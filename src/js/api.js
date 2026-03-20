@@ -319,14 +319,14 @@ const API = {
     ],
 
     phaseRules: [
-        { id: 'pr_01', name: '阶段交付物完整性', description: '交付物是否齐全，证据是否可追溯。' },
-        { id: 'pr_02', name: '过程合规性', description: '流程与制度执行情况，审批留痕是否完整。' },
-        { id: 'pr_03', name: '数据建模规范性', description: '主题域划分、维度事实设计与命名规范。' },
-        { id: 'pr_04', name: 'ETL链路稳定性', description: '调度可靠性、失败重跑、延迟与告警。' },
-        { id: 'pr_05', name: '质量校验覆盖率', description: '质量规则覆盖、抽检与问题闭环。' },
-        { id: 'pr_06', name: '安全策略落实', description: '访问控制、脱敏、审计与最小权限。' },
-        { id: 'pr_07', name: '演示可用性', description: '演示流程顺畅，指标口径清晰，查询性能良好。' },
-        { id: 'pr_08', name: '问题整改闭环', description: '问题记录、分级、整改与复核闭环。' },
+        { id: 'pr_01', name: '阶段交付物完整性', description: '交付物是否齐全，证据是否可追溯。', category: '交付质量', enabled: true },
+        { id: 'pr_02', name: '过程合规性', description: '流程与制度执行情况，审批留痕是否完整。', category: '过程管控', enabled: true },
+        { id: 'pr_03', name: '数据建模规范性', description: '主题域划分、维度事实设计与命名规范。', category: '技术实施', enabled: true },
+        { id: 'pr_04', name: 'ETL链路稳定性', description: '调度可靠性、失败重跑、延迟与告警。', category: '技术实施', enabled: true },
+        { id: 'pr_05', name: '质量校验覆盖率', description: '质量规则覆盖、抽检与问题闭环。', category: '交付质量', enabled: true },
+        { id: 'pr_06', name: '安全策略落实', description: '访问控制、脱敏、审计与最小权限。', category: '安全合规', enabled: true },
+        { id: 'pr_07', name: '演示可用性', description: '演示流程顺畅，指标口径清晰，查询性能良好。', category: '交付质量', enabled: true },
+        { id: 'pr_08', name: '问题整改闭环', description: '问题记录、分级、整改与复核闭环。', category: '过程管控', enabled: true },
     ],
 
     departmentPhasePlans: {
@@ -939,6 +939,50 @@ const API = {
 
     async getPhaseRules() {
         return this.phaseRules;
+    },
+
+    async createPhaseRule(data) {
+        const name = String(data?.name || '').trim();
+        if (!name) return { success: false, message: '规则名称不能为空' };
+        const id = 'pr_' + Date.now();
+        this.phaseRules.push({
+            id,
+            name,
+            description: String(data.description || '').trim(),
+            category: String(data.category || '交付质量').trim(),
+            enabled: data.enabled !== false,
+        });
+        return { success: true, id };
+    },
+
+    async updatePhaseRule(ruleId, data) {
+        const rule = this.phaseRules.find(r => r.id === ruleId);
+        if (!rule) return { success: false, message: '规则不存在' };
+        if (data.name !== undefined) {
+            const name = String(data.name).trim();
+            if (!name) return { success: false, message: '规则名称不能为空' };
+            rule.name = name;
+        }
+        if (data.description !== undefined) rule.description = String(data.description).trim();
+        if (data.category !== undefined) rule.category = String(data.category).trim();
+        if (data.enabled !== undefined) rule.enabled = Boolean(data.enabled);
+        return { success: true };
+    },
+
+    async deletePhaseRule(ruleId) {
+        const idx = this.phaseRules.findIndex(r => r.id === ruleId);
+        if (idx < 0) return { success: false, message: '规则不存在' };
+        for (const [deptId, plan] of Object.entries(this.departmentPhasePlans || {})) {
+            for (const p of (plan.phases || [])) {
+                if ((p.ruleBindings || []).some(b => b.ruleId === ruleId)) {
+                    const dept = (this.departments || []).find(d => d.id === deptId);
+                    const tpl = (this.phaseTemplates || []).find(t => t.id === p.phaseId);
+                    return { success: false, message: `该规则已被部门「${dept?.name || deptId}」的阶段「${tpl?.name || p.phaseId}」绑定，请先解绑再删除` };
+                }
+            }
+        }
+        this.phaseRules.splice(idx, 1);
+        return { success: true };
     },
 
     resolveDepartmentIdByName(name) {

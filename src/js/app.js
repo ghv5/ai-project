@@ -11,6 +11,7 @@ const App = {
         Router.register('/warehouses/:id', (params) => this.renderWarehouseDetail(params.id));
         Router.register('/warehouses', () => this.renderWarehouseList());
         Router.register('/phases', () => this.renderPhaseTemplateList());
+        Router.register('/rules', () => this.renderPhaseRuleList());
         Router.register('/departments', () => this.renderDepartmentList());
         Router.register('/departments/:id/config', (params) => this.renderDepartmentConfig(params.id));
         Router.register('/evaluations/new', (_params, query) => this.renderCreateEvaluation(query));
@@ -41,6 +42,10 @@ const App = {
                         <div class="menu-item ${activeMenu === 'phase-list' ? 'active' : ''}" onclick="Router.navigate('/phases')">
                             <i class="menu-item-icon fa-solid fa-layer-group" aria-hidden="true"></i>
                             <span>阶段列表</span>
+                        </div>
+                        <div class="menu-item ${activeMenu === 'rule-list' ? 'active' : ''}" onclick="Router.navigate('/rules')">
+                            <i class="menu-item-icon fa-solid fa-scale-balanced" aria-hidden="true"></i>
+                            <span>规则列表</span>
                         </div>
                         <div class="menu-item ${activeMenu === 'eval-list' ? 'active' : ''}" onclick="Router.navigate('/evaluations')">
                             <i class="menu-item-icon fa-solid fa-clipboard-check" aria-hidden="true"></i>
@@ -996,6 +1001,185 @@ const App = {
         this.renderPhaseTemplateList();
     },
 
+    // ── Phase Rule Management ──
+
+    ruleFilterCategory: '',
+    rulePanelMode: '',
+    ruleEditingId: '',
+    ruleDraft: { name: '', description: '', category: '交付质量', enabled: true },
+
+    async renderPhaseRuleList() {
+        const rules = await API.getPhaseRules();
+        const categories = [...new Set((rules || []).map(r => r.category).filter(Boolean))];
+        const filtered = this.ruleFilterCategory
+            ? (rules || []).filter(r => r.category === this.ruleFilterCategory)
+            : (rules || []);
+        this.renderWithLayout(`
+            <div class="container">
+                ${this.renderPageHero({
+                    title: '阶段规则管理',
+                    subtitle: '维护阶段评估规则，在部门配置页绑定至阶段用于规则均分计算。',
+                    image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1600&q=80',
+                    tags: ['规则维护', '分类筛选', '绑定管理'],
+                })}
+                <div class="page-header">
+                    <h1 class="page-title">阶段规则</h1>
+                    <button class="btn btn-primary" onclick="App.openRulePanel()">
+                        <i class="fa-solid fa-circle-plus" aria-hidden="true"></i>
+                        <span>新建规则</span>
+                    </button>
+                </div>
+
+                <div class="card" style="padding: 12px 18px; margin-bottom: 0;">
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <span class="status-badge ${!this.ruleFilterCategory ? 'status-info' : ''}" style="cursor:pointer;" onclick="App.filterRuleCategory('')">全部</span>
+                        ${categories.map(c => `
+                            <span class="status-badge ${this.ruleFilterCategory === c ? 'status-info' : ''}" style="cursor:pointer;" onclick="App.filterRuleCategory('${c}')">${c}</span>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="report-grid">
+                    ${filtered.map(rule => `
+                        <div class="report-card">
+                            <div class="report-preview">
+                                <i class="fa-solid fa-scale-balanced" style="font-size: 48px;"></i>
+                            </div>
+                            <div class="report-info">
+                                <div class="report-title">${rule.name}</div>
+                                <div class="report-meta">${rule.description || '-'}</div>
+                                <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+                                    <span class="status-badge" style="background: rgba(24,144,255,0.10); color:#1677ff;">${rule.category || '-'}</span>
+                                    <span class="status-badge ${rule.enabled !== false ? 'status-success' : 'status-error'}">${rule.enabled !== false ? '启用' : '禁用'}</span>
+                                </div>
+                                <div class="report-actions" style="margin-top: 12px;">
+                                    <button class="btn btn-sm btn-default" onclick="App.openRuleEditPanel('${rule.id}')">编辑</button>
+                                    <button class="btn btn-sm btn-default" onclick="App.toggleRuleEnabled('${rule.id}')">${rule.enabled !== false ? '禁用' : '启用'}</button>
+                                    <button class="btn btn-sm btn-danger" onclick="App.deletePhaseRule('${rule.id}')">删除</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                ${this.rulePanelMode ? this.renderRulePanel() : ''}
+            </div>
+        `, 'rule-list');
+    },
+
+    filterRuleCategory(category) {
+        this.ruleFilterCategory = category;
+        this.renderPhaseRuleList();
+    },
+
+    openRulePanel() {
+        this.rulePanelMode = 'create';
+        this.ruleEditingId = '';
+        this.ruleDraft = { name: '', description: '', category: '交付质量', enabled: true };
+        this.renderPhaseRuleList();
+    },
+
+    openRuleEditPanel(ruleId) {
+        const rule = (API.phaseRules || []).find(r => r.id === ruleId);
+        if (!rule) { alert('规则不存在'); return; }
+        this.rulePanelMode = 'edit';
+        this.ruleEditingId = ruleId;
+        this.ruleDraft = { name: rule.name, description: rule.description || '', category: rule.category || '交付质量', enabled: rule.enabled !== false };
+        this.renderPhaseRuleList();
+    },
+
+    closeRulePanel() {
+        this.rulePanelMode = '';
+        this.ruleEditingId = '';
+        this.renderPhaseRuleList();
+    },
+
+    renderRulePanel() {
+        const rules = API.phaseRules || [];
+        const defaultCategories = ['交付质量', '过程管控', '安全合规', '技术实施'];
+        const allCategories = [...new Set([...defaultCategories, ...rules.map(r => r.category).filter(Boolean)])];
+        const isCustom = this.ruleDraft.category && !allCategories.includes(this.ruleDraft.category);
+        const categoryOptions = allCategories.map(c => `<option value="${c}" ${this.ruleDraft.category === c ? 'selected' : ''}>${c}</option>`).join('');
+        return `
+            <div class="data-source-drawer-backdrop" onclick="App.closeRulePanel()"></div>
+            <div class="data-source-drawer">
+                <div class="data-source-drawer-header">
+                    <div>
+                        <div class="data-source-drawer-title">${this.ruleEditingId ? '编辑规则' : '新建规则'}</div>
+                        <div class="data-source-drawer-subtitle">配置阶段评估规则的基本信息</div>
+                    </div>
+                    <button class="btn btn-default btn-sm" onclick="App.closeRulePanel()">关闭</button>
+                </div>
+                <div class="data-source-panel-content">
+                    <div class="data-source-step" style="padding-bottom: 0;">
+                        <div class="data-source-step-title">基本信息</div>
+                        <div class="data-source-form-grid">
+                            <div class="form-group">
+                                <label class="form-label required">规则名称</label>
+                                <input id="rule_name" class="input" value="${(this.ruleDraft.name || '').replace(/\"/g, '&quot;')}" placeholder="例如：阶段交付物完整性">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">分类</label>
+                                <select id="rule_category" onchange="if(this.value==='__custom__'){document.getElementById('rule_category_custom').style.display='block';this.style.display='none';}">
+                                    ${categoryOptions}
+                                    <option value="__custom__">自定义...</option>
+                                </select>
+                                <input id="rule_category_custom" class="input" style="display:${isCustom ? 'block' : 'none'}; margin-top:8px;" value="${isCustom ? (this.ruleDraft.category || '').replace(/\"/g, '&quot;') : ''}" placeholder="输入自定义分类">
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="form-label">描述</label>
+                                <input id="rule_desc" class="input" value="${(this.ruleDraft.description || '').replace(/\"/g, '&quot;')}" placeholder="规则的评估要点说明">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">状态</label>
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input id="rule_enabled" type="checkbox" ${this.ruleDraft.enabled !== false ? 'checked' : ''}>
+                                    <span>启用</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="data-source-panel-actions">
+                        <button class="btn btn-default" onclick="App.closeRulePanel()">取消</button>
+                        <button class="btn btn-primary" onclick="App.submitRule()">保存规则</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    async submitRule() {
+        const name = (document.getElementById('rule_name')?.value || '').trim();
+        const description = (document.getElementById('rule_desc')?.value || '').trim();
+        const customEl = document.getElementById('rule_category_custom');
+        const selectEl = document.getElementById('rule_category');
+        const category = (customEl?.style.display !== 'none' && customEl?.value?.trim())
+            ? customEl.value.trim()
+            : (selectEl?.value === '__custom__' ? '交付质量' : (selectEl?.value || '交付质量'));
+        const enabled = document.getElementById('rule_enabled')?.checked !== false;
+        const res = this.ruleEditingId
+            ? await API.updatePhaseRule(this.ruleEditingId, { name, description, category, enabled })
+            : await API.createPhaseRule({ name, description, category, enabled });
+        if (!res?.success) { alert(res?.message || '保存失败'); return; }
+        this.rulePanelMode = '';
+        this.ruleEditingId = '';
+        this.renderPhaseRuleList();
+    },
+
+    async toggleRuleEnabled(ruleId) {
+        const rule = (API.phaseRules || []).find(r => r.id === ruleId);
+        if (!rule) return;
+        await API.updatePhaseRule(ruleId, { enabled: !rule.enabled });
+        this.renderPhaseRuleList();
+    },
+
+    async deletePhaseRule(ruleId) {
+        if (!confirm('确认删除该规则？')) return;
+        const res = await API.deletePhaseRule(ruleId);
+        if (!res?.success) { alert(res?.message || '删除失败'); return; }
+        this.renderPhaseRuleList();
+    },
+
     async renderDepartmentList() {
         const departments = await API.getDepartments();
         const templates = await API.getPhaseTemplates();
@@ -1228,12 +1412,16 @@ const App = {
                                     <div class="phase-plan-rules">
                                         ${scoringMode === 'rules_avg' ? `
                                             <div class="phase-rule-grid">
-                                                ${(rules || []).map(r => `
-                                                    <label class="phase-rule-item">
-                                                        <input type="checkbox" ${bound.has(r.id) ? 'checked' : ''} onchange="App.toggleDepartmentPhaseRule('${deptId}','${p.phaseId}','${r.id}', this.checked)">
-                                                        <span class="phase-rule-name">${r.name}</span>
-                                                    </label>
-                                                `).join('')}
+                                                ${(rules || []).map(r => {
+                                                    const disabled = r.enabled === false;
+                                                    const alreadyBound = bound.has(r.id);
+                                                    if (disabled && !alreadyBound) return '';
+                                                    return `
+                                                    <label class="phase-rule-item" style="${disabled ? 'opacity:0.45; pointer-events:none;' : ''}">
+                                                        <input type="checkbox" ${alreadyBound ? 'checked' : ''} ${disabled ? 'disabled' : ''} onchange="App.toggleDepartmentPhaseRule('${deptId}','${p.phaseId}','${r.id}', this.checked)">
+                                                        <span class="phase-rule-name">${r.name}${disabled ? '（已禁用）' : ''}</span>
+                                                    </label>`;
+                                                }).join('')}
                                             </div>
                                         ` : ''}
                                         ${ruleHint}
