@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>省级数据仓库评估系统</title>
+    
+    <!-- 引入高品质中文字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    
+    <!-- 全局与业务样式 -->
+    <link rel="stylesheet" href="src/css/style.css">
+    
+    <style>
+        /* 页面级基础变量与政务平台色彩体系 */
+        :root {
+            --gov-primary: #1a3b5c;       /* 稳重政务蓝 */
+            --bg-base: #f0f4f8;           /* 层次底层背景 */
+            --bg-surface: #ffffff;        /* 容器层背景 */
+            --skeleton-base: #e2e8f0;     /* 骨架底色 */
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--bg-base);
+            /* 微妙的背景渐变光影，提升高级感 */
+            background-image: radial-gradient(circle at 50% 0%, #fbfdfd 0%, #f0f4f8 100%);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        noscript {
+            display: block;
+            padding: 16px;
+            text-align: center;
+            background-color: #fef3c7;
+            color: #92400e;
+            font-weight: 500;
+            font-size: 14px;
+            border-bottom: 1px solid #f59e0b;
+        }
+
+        #app {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ----- 精致骨架屏样式 ----- */
+        .sk-header {
+            height: 60px;
+            background: var(--gov-primary);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            z-index: 10;
+        }
+        .sk-logo {
+            width: 220px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+        .sk-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        .sk-sidebar {
+            width: 260px;
+            background: var(--bg-surface);
+            padding: 24px 16px;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.03);
+            z-index: 5;
+        }
+        .sk-menu-item {
+            height: 40px;
+            background: var(--skeleton-base);
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        .sk-main {
+            flex: 1;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            overflow-y: auto;
+        }
+        .sk-title {
+            width: 250px;
+            height: 32px;
+            background: var(--skeleton-base);
+            border-radius: 6px;
+        }
+        .sk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+        .sk-card {
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 24px;
+            height: 180px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .sk-line {
+            height: 14px;
+            background: var(--skeleton-base);
+            border-radius: 4px;
+        }
+        .sk-line.short { width: 35%; height: 20px; margin-bottom: 8px; }
+        .sk-line.medium { width: 65%; }
+        .sk-line.long { width: 100%; }
+
+        /* 高级流光动画 */
+        .shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            transform: translateX(-100%);
+            background-image: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0,
+                rgba(255, 255, 255, 0.4) 20%,
+                rgba(255, 255, 255, 0.6) 60%,
+                rgba(255, 255, 255, 0)
+            );
+            animation: shimmer 2s infinite ease-out;
+        }
+        .sk-header .shimmer::after {
+            background-image: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0,
+                rgba(255, 255, 255, 0.08) 20%,
+                rgba(255, 255, 255, 0.15) 60%,
+                rgba(255, 255, 255, 0)
+            );
+        }
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .sk-sidebar { display: none; }
+            .sk-main { padding: 16px; }
+            .sk-grid { grid-template-columns: 1fr; }
+            .sk-header { padding: 0 16px; }
+        }
+    </style>
+</head>
+<body>
+    <noscript>
+        <strong>非常抱歉，省级数据仓库评估系统需要启用 JavaScript 才能完整呈现。请在浏览器设置中开启 JavaScript。</strong>
+    </noscript>
+
+    <!-- 应用挂载点与骨架屏 -->
+    <div id="app">
+        <header class="sk-header">
+            <div class="sk-logo shimmer"></div>
+        </header>
+        <div class="sk-body">
+            <aside class="sk-sidebar">
+                <div class="sk-menu-item shimmer"></div>
+                <div class="sk-menu-item shimmer" style="width: 85%;"></div>
+                <div class="sk-menu-item shimmer" style="width: 90%;"></div>
+                <div class="sk-menu-item shimmer" style="width: 75%;"></div>
+            </aside>
+            <main class="sk-main">
+                <div class="sk-title shimmer"></div>
+                <div class="sk-grid">
+                    <div class="sk-card">
+                        <div class="sk-line short shimmer"></div>
+                        <div class="sk-line long shimmer"></div>
+                        <div class="sk-line medium shimmer"></div>
+                        <div class="sk-line long shimmer" style="margin-top:auto;"></div>
+                    </div>
+                    <div class="sk-card">
+                        <div class="sk-line short shimmer"></div>
+                        <div class="sk-line long shimmer"></div>
+                        <div class="sk-line medium shimmer"></div>
+                        <div class="sk-line long shimmer" style="margin-top:auto;"></div>
+                    </div>
+                    <div class="sk-card">
+                        <div class="sk-line short shimmer"></div>
+                        <div class="sk-line long shimmer"></div>
+                        <div class="sk-line medium shimmer"></div>
+                        <div class="sk-line long shimmer" style="margin-top:auto;"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 业务脚本严格按序加载 -->
+    <script src="src/js/router.js" defer></script>
+    <script src="src/js/api.js" defer></script>
+    <script src="src/js/app.js" defer></script>
+</body>
+</html>
