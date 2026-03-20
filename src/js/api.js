@@ -1160,7 +1160,7 @@ const API = {
         }
 
         const phaseScoreSeeds = dimension === 'phase'
-            ? [{ phaseId, score: null, scoringMode: 'manual' }]
+            ? [{ phaseId, score: null, scoringMode: this.getPhaseTemplateById(phaseId)?.scoringMode || 'manual' }]
             : orderedPhases.map(item => {
                 const tpl = this.getPhaseTemplateById(item.phaseId);
                 return { phaseId: item.phaseId, score: null, scoringMode: tpl?.scoringMode || 'manual' };
@@ -1202,7 +1202,7 @@ const API = {
         const plan = this.getDepartmentPhasePlan(evaluation.departmentId);
         const planItem = (plan?.phases || []).find(p => p.phaseId === phaseId);
         const template = this.getPhaseTemplateById(phaseId);
-        const scoringMode = evaluation.evaluationDimension === 'phase' ? 'manual' : (template?.scoringMode || 'manual');
+        const scoringMode = template?.scoringMode || 'manual';
 
         if (submission) {
             const existing = (evaluation.phaseSubmissions || []).find(s => s.phaseId === phaseId);
@@ -1210,7 +1210,7 @@ const API = {
             else (evaluation.phaseSubmissions || (evaluation.phaseSubmissions = [])).push({ phaseId, data: submission });
         }
 
-        if (scoringMode === 'rules_avg' && planItem?.ruleBindings?.length && evaluation.evaluationDimension !== 'phase') {
+        if (scoringMode === 'rules_avg' && planItem?.ruleBindings?.length) {
             const bindings = planItem.ruleBindings.map(b => b.ruleId).filter(Boolean);
             const scoreMap = new Map();
             (ruleScores || []).forEach(item => {

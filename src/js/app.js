@@ -1671,95 +1671,99 @@ const App = {
     selectedWarehouseId: '',
 
     async renderCreateEvaluation(query = {}) {
-        const gradeLevels = API.gradeLevels || [];
         const templates = await API.getPhaseTemplates();
+        const phaseRules = await API.getPhaseRules();
         const target = query?.target === 'phase' ? 'phase' : query?.target === 'department' ? 'department' : 'warehouse';
         const deptIdFromQuery = String(query?.deptId || '').trim();
         const phaseIdFromQuery = String(query?.phaseId || '').trim();
-
         const warehouseId = target === 'warehouse' ? (this.selectedWarehouseId || '') : '';
         const deptInfo = target === 'warehouse'
             ? (warehouseId ? API.getWarehouseDepartmentInfo(warehouseId) : null)
             : (deptIdFromQuery ? { deptId: deptIdFromQuery, deptName: (API.departments || []).find(d => d.id === deptIdFromQuery)?.name || '' } : null);
         const plan = deptInfo ? API.getDepartmentPhasePlan(deptInfo.deptId) : null;
         const orderedPhases = (plan?.phases || []).slice().sort((a, b) => (a.order || 0) - (b.order || 0));
-        const phasePreview = orderedPhases.map((p, idx) => {
-            const tpl = templates.find(t => t.id === p.phaseId);
-            return {
-                idx,
-                name: tpl?.name || p.phaseId,
-                desc: tpl?.description || '-',
-                scoringMode: tpl?.scoringMode || 'manual',
-                ruleCount: (p.ruleBindings || []).length,
-            };
-        });
+        const effectivePhases = target === 'phase'
+            ? orderedPhases.filter(p => p.phaseId === phaseIdFromQuery)
+            : orderedPhases;
         const canStart = Boolean(deptInfo) && (target === 'phase' ? Boolean(phaseIdFromQuery) : orderedPhases.length > 0);
+        const evalType = target === 'phase' ? '阶段评估' : '部门评估';
         const headerTitle = target === 'department'
             ? (deptInfo?.deptName || '部门评估')
             : target === 'phase'
                 ? `${deptInfo?.deptName || '部门'} - ${(templates.find(t => t.id === phaseIdFromQuery)?.name || phaseIdFromQuery || '阶段')}`
                 : this.selectedWarehouseName;
-        const headerMeta = target === 'warehouse'
-            ? `所属部门：${deptInfo?.deptName || '<span style="color:#ef4444;">未识别</span>'}`
-            : `评估维度：${target === 'phase' ? '阶段' : '部门'}，所属部门：${deptInfo?.deptName || '-'}`;
+
+        const phaseSections = effectivePhases.map((p, idx) => {
+            const tpl = templates.find(t => t.id === p.phaseId);
+            const scoringMode = tpl?.scoringMode || 'manual';
+            const bindings = (p.ruleBindings || []).map(b => b.ruleId).filter(Boolean);
+            const boundRules = bindings.map(rid => (phaseRules || []).find(r => r.id === rid)).filter(Boolean);
+            return `
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div class="phase-preview-index">${idx + 1}</div>
+                            <div>
+                                <div style="font-weight: 600; color: var(--ant-text);">${tpl?.name || p.phaseId}</div>
+                                <div style="margin-top: 2px; color: var(--ant-text-tertiary); font-size: 13px;">${tpl?.description || ''}</div>
+                            </div>
+                        </div>
+                        <span class="status-badge ${scoringMode === 'rules_avg' ? 'status-info' : ''}">${scoringMode === 'rules_avg' ? '自动计算（规则均分）' : '手动录入'}</span>
+                    </div>
+                    ${scoringMode === 'rules_avg' && boundRules.length ? `
+                        <div style="padding: 12px 16px; background: var(--ant-fill-tertiary); border-radius: var(--ant-radius); border: 1px solid var(--ant-border-secondary);">
+                            <div style="font-size: 12px; color: var(--ant-text-tertiary); margin-bottom: 8px;">绑定规则（${boundRules.length}）· 阶段得分 = 规则得分均值</div>
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                ${boundRules.map(r => `
+                                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                                        <span style="font-size: 13px; color: var(--ant-text);">${r.name}</span>
+                                        <span style="font-size: 12px; color: var(--ant-text-quaternary);">待评分</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+
         this.renderWithLayout(`
             <div class="container" style="max-width: 1100px;">
-                <div class="card" style="padding: 18px 20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap: wrap;">
+                <div class="back-link" onclick="Router.navigate('/evaluations')">← 返回列表</div>
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
                         <div>
-                            <div style="color:#64748b; font-size: 12px; margin-bottom: 6px;">立即评估</div>
-                            <div style="font-weight: 750; font-size: 18px; color:#0f172a;">${headerTitle}</div>
-                            <div style="margin-top: 6px; color:#64748b; font-size: 13px;">${headerMeta}</div>
+                            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                                <span class="status-badge status-info">${evalType}</span>
+                            </div>
+                            <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 4px;">${headerTitle}</h2>
+                            <div style="color: var(--ant-text-tertiary); font-size: 13px;">
+                                部门：${deptInfo?.deptName || '-'} · 阶段数：${effectivePhases.length}
+                            </div>
                         </div>
-                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <div style="display: flex; gap: 8px;">
                             <button class="btn btn-primary" ${canStart ? '' : 'disabled'} onclick="App.startEvaluationFromCreate()">开始评估</button>
+                            ${deptInfo?.deptId ? `<button class="btn btn-default" onclick="Router.navigate('/departments/${deptInfo.deptId}/config')">编辑阶段</button>` : ''}
                         </div>
                     </div>
-                    ${canStart ? '' : `
+                    ${canStart ? `
+                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--ant-border-secondary);">
+                            <div style="font-size: 12px; color: var(--ant-text-tertiary);">
+                                得分计算：规则得分 → 阶段得分（规则均值）→ 总分（阶段均值）· 开始评估后进入编辑模式
+                            </div>
+                        </div>
+                    ` : `
                         <div style="margin-top: 12px;">
                             <span class="status-badge status-warning">所属部门未配置评估阶段，当前不可评估</span>
-                            ${deptInfo?.deptId ? `<button class="btn btn-sm btn-default" style="margin-left: 10px;" onclick="Router.navigate('/departments/${deptInfo.deptId}/config')">去配置阶段</button>` : ''}
+                            ${deptInfo?.deptId ? `<button class="btn btn-sm btn-default" style="margin-left: 8px;" onclick="Router.navigate('/departments/${deptInfo.deptId}/config')">去配置</button>` : ''}
                         </div>
                     `}
                 </div>
 
-                <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap; margin-bottom: 12px;">
-                        <h2 class="section-title" style="margin-bottom: 0;">阶段预览</h2>
-                        ${deptInfo?.deptId ? `<button class="btn btn-sm btn-default" onclick="Router.navigate('/departments/${deptInfo.deptId}/config')">编辑部门阶段</button>` : ''}
-                    </div>
-                    ${phasePreview.length ? `
-                        <div style="display:flex; flex-direction:column; gap:12px;">
-                            ${phasePreview.map(item => `
-                                <div class="phase-preview-row">
-                                    <div style="display:flex; gap:12px; align-items:flex-start;">
-                                        <div class="phase-preview-index">${item.idx + 1}</div>
-                                        <div>
-                                            <div style="font-weight: 650; color:#0f172a;">${item.name}</div>
-                                            <div style="margin-top: 4px; color:#64748b; font-size: 13px;">${item.desc}</div>
-                                        </div>
-                                    </div>
-                                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                                        <span class="status-badge ${item.scoringMode === 'rules_avg' ? 'status-info' : ''}">${item.scoringMode === 'rules_avg' ? `规则均分（${item.ruleCount}）` : '手工录入'}</span>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : `<div style="color:#8c8c8c;">暂无阶段配置</div>`}
+                <div style="margin-bottom: 8px;">
+                    <h3 style="font-size: 16px; font-weight: 600;">评估阶段预览</h3>
                 </div>
-
-                <div class="card">
-                    <h2 class="section-title">得分等级划分</h2>
-                    <div class="grade-levels">
-                        ${gradeLevels.map(gl => `
-                            <div class="grade-card grade-${gl.grade.toLowerCase()}">
-                                <div class="grade-grade">${gl.grade}</div>
-                                <div class="grade-range">${gl.minScore} - ${gl.maxScore} 分</div>
-                                <div class="grade-desc">${gl.desc}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
+                ${effectivePhases.length ? phaseSections : '<div class="card"><div style="color: var(--ant-text-tertiary);">暂无阶段配置</div></div>'}
             </div>
         `, 'eval-list');
     },
@@ -1859,278 +1863,243 @@ const App = {
         const deptPlan = evaluation.departmentId ? API.getDepartmentPhasePlan(evaluation.departmentId) : null;
         const isPhaseEval = (evaluation.evaluationDimension || (evaluation.phaseId ? 'phase' : 'department')) === 'phase';
         const planPhases = (deptPlan?.phases || []).slice().sort((a, b) => (a.order || 0) - (b.order || 0));
-        const effectivePlanPhases = isPhaseEval
-            ? [{ phaseId: evaluation.phaseId, order: 1, ruleBindings: [] }]
+        let effectivePhases = isPhaseEval
+            ? planPhases.filter(p => p.phaseId === evaluation.phaseId)
             : planPhases;
-        const issueSeverityMeta = {
-            high: { label: '高', color: '#cf1322', bg: 'rgba(207,19,34,0.12)' },
-            medium: { label: '中', color: '#d48806', bg: 'rgba(212,136,6,0.12)' },
-            low: { label: '低', color: '#389e0d', bg: 'rgba(56,158,13,0.12)' },
-        };
-        const issueCount = evaluation.issues?.length || 0;
+        if (isPhaseEval && !effectivePhases.length) {
+            effectivePhases = [{ phaseId: evaluation.phaseId, order: 1, ruleBindings: [] }];
+        }
         const completed = evaluation.status === 'completed';
-        const getPhaseName = (phaseId) => templates.find(t => t.id === phaseId)?.name || phaseId;
-        const getPhaseTemplate = (phaseId) => templates.find(t => t.id === phaseId) || null;
-        const getPhasePlanItem = (phaseId) => effectivePlanPhases.find(p => p.phaseId === phaseId) || null;
-        const getPhaseSubmission = (phaseId) => (evaluation.phaseSubmissions || []).find(s => s.phaseId === phaseId)?.data || {};
+        const editable = !completed;
+        const evalType = isPhaseEval ? '阶段评估' : '部门评估';
+        const evalTitle = isPhaseEval
+            ? `${evaluation.departmentName || ''} - ${templates.find(t => t.id === evaluation.phaseId)?.name || evaluation.phaseId}`
+            : (evaluation.departmentName || evaluation.warehouseName || '评估详情');
+        const issueCount = evaluation.issues?.length || 0;
+        const issueSeverityMeta = {
+            high: { label: '高', color: '#cf1322', bg: 'rgba(207,19,34,0.08)' },
+            medium: { label: '中', color: '#d48806', bg: 'rgba(212,136,6,0.08)' },
+            low: { label: '低', color: '#389e0d', bg: 'rgba(56,158,13,0.08)' },
+        };
+
         const getPhaseScore = (phaseId) => (evaluation.phaseScores || []).find(s => s.phaseId === phaseId)?.score;
         const getPhaseRuleScore = (phaseId, ruleId) => (evaluation.phaseRuleScores || []).find(s => s.phaseId === phaseId && s.ruleId === ruleId)?.score;
-        const phaseTabs = effectivePlanPhases.map((p, i) => `<div class="tab-item phase-tab-item ${i === 0 ? 'active' : ''}" onclick="App.switchEvalPhaseTab('${p.phaseId}', this)">${getPhaseName(p.phaseId)}</div>`).join('');
-        const phaseContents = effectivePlanPhases.map((p, i) => {
-            const tpl = getPhaseTemplate(p.phaseId);
-            const scoringMode = isPhaseEval ? 'manual' : (tpl?.scoringMode || 'manual');
+        const getPhaseSubmission = (phaseId) => (evaluation.phaseSubmissions || []).find(s => s.phaseId === phaseId)?.data || {};
+
+        const phaseScoreSummary = effectivePhases.map(p => ({
+            phaseId: p.phaseId,
+            name: templates.find(t => t.id === p.phaseId)?.name || p.phaseId,
+            score: getPhaseScore(p.phaseId),
+        }));
+        const validScores = phaseScoreSummary.filter(p => p.score !== null && p.score !== undefined).map(p => p.score);
+        const totalScore = completed ? evaluation.score : (validScores.length ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length) : null);
+        const totalGrade = completed ? evaluation.grade : (totalScore !== null ? API.getGradeByScore(totalScore) : null);
+
+        // Render each phase as a linear section
+        const phaseSections = effectivePhases.map((p, idx) => {
+            const tpl = templates.find(t => t.id === p.phaseId);
+            const scoringMode = tpl?.scoringMode || 'manual';
             const submission = getPhaseSubmission(p.phaseId);
             const score = getPhaseScore(p.phaseId);
-            const bindings = (getPhasePlanItem(p.phaseId)?.ruleBindings || []).map(b => b.ruleId).filter(Boolean);
+            const bindings = (p.ruleBindings || []).map(b => b.ruleId).filter(Boolean);
+            const fields = tpl?.formSchema?.fields || [];
+            const scoreColor = score !== null && score !== undefined
+                ? (score >= 90 ? 'var(--ant-success)' : score >= 80 ? 'var(--ant-primary)' : score >= 60 ? 'var(--ant-warning)' : 'var(--ant-error)')
+                : 'var(--ant-text-quaternary)';
+
+            // Form fields - editable or readonly
+            const fieldRows = fields.map(f => {
+                const val = submission?.[f.id];
+                const requiredMark = f.required ? '<span class="form-label-required">*</span>' : '';
+                if (f.type === 'select') {
+                    if (!editable) {
+                        const opt = (f.options || []).find(o => String(o.value) === String(val));
+                        return `<div class="form-group"><label class="form-label">${f.label}${requiredMark}</label><div style="padding: 4px 0; color: var(--ant-text);">${opt?.label || val || '-'}</div></div>`;
+                    }
+                    return `<div class="form-group"><label class="form-label">${f.label}${requiredMark}</label><select id="phase_field_${p.phaseId}_${f.id}"><option value="">请选择</option>${(f.options || []).map(o => `<option value="${o.value}" ${String(val || '') === String(o.value) ? 'selected' : ''}>${o.label}</option>`).join('')}</select></div>`;
+                }
+                if (f.type === 'attachment') {
+                    if (!editable) {
+                        return `<div class="form-group"><label class="form-label">${f.label}${requiredMark}</label><div class="phase-attachment-name ${val ? '' : 'is-empty'}">${val ? `已上传：${val}` : '未上传'}</div></div>`;
+                    }
+                    return `<div class="form-group"><label class="form-label">${f.label}${requiredMark}</label><input id="phase_field_${p.phaseId}_${f.id}" type="file" class="input">${val ? `<div class="phase-attachment-name">已选择：${val}</div>` : '<div class="phase-attachment-name is-empty">未选择文件</div>'}</div>`;
+                }
+                if (!editable) {
+                    return `<div class="form-group"><label class="form-label">${f.label}${requiredMark}</label><div style="padding: 4px 0; color: var(--ant-text);">${val || '-'}</div></div>`;
+                }
+                return `<div class="form-group"><label class="form-label">${f.label}${requiredMark}</label><input id="phase_field_${p.phaseId}_${f.id}" class="input" value="${val ? String(val).replace(/\"/g, '&quot;') : ''}" placeholder="请输入"></div>`;
+            }).join('');
+
+            // Rule rows for rules_avg mode
             const ruleRows = bindings.map(rid => {
                 const rule = (phaseRules || []).find(r => r.id === rid);
                 const cur = getPhaseRuleScore(p.phaseId, rid);
                 return `
                     <div class="phase-rule-score-row">
-                        <div>
-                            <div style="font-weight: 650; color:#0f172a;">${rule?.name || rid}</div>
-                            <div style="margin-top:4px; color:#64748b; font-size: 12px;">${rule?.description || '-'}</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500; color: var(--ant-text);">${rule?.name || rid}</div>
+                            ${rule?.description ? `<div style="margin-top: 2px; color: var(--ant-text-tertiary); font-size: 12px;">${rule.description}</div>` : ''}
                         </div>
-                        <input class="input phase-score-input" id="phase_rule_${p.phaseId}_${rid}" type="number" min="0" max="100" value="${cur ?? ''}" placeholder="0-100">
+                        ${editable
+                            ? `<input class="input phase-score-input" id="phase_rule_${p.phaseId}_${rid}" type="number" min="0" max="100" value="${cur ?? ''}" placeholder="0-100" style="width: 100px; text-align: center;">`
+                            : `<span class="phase-score-pill ${cur === null || cur === undefined ? 'is-empty' : ''}">${cur ?? '--'}</span>`
+                        }
                     </div>
                 `;
             }).join('');
-            const fields = tpl?.formSchema?.fields || [];
-            const fieldRows = fields.map(f => {
-                const val = submission?.[f.id];
-                const requiredMark = f.required ? '<span class="form-label-required">*</span>' : '';
-                if (f.type === 'select') {
-                    const options = (f.options || []).map(o => `<option value="${o.value}" ${String(val || '') === String(o.value) ? 'selected' : ''}>${o.label}</option>`).join('');
-                    return `
-                        <div class="form-group">
-                            <label class="form-label">${f.label}${requiredMark}</label>
-                            <select id="phase_field_${p.phaseId}_${f.id}">
-                                <option value="">请选择</option>
-                                ${options}
-                            </select>
-                        </div>
-                    `;
-                }
-                if (f.type === 'attachment') {
-                    const fileLabel = val ? `<div class="phase-attachment-name">已选择：${val}</div>` : '<div class="phase-attachment-name is-empty">未选择文件</div>';
-                    return `
-                        <div class="form-group">
-                            <label class="form-label">${f.label}${requiredMark}</label>
-                            <input id="phase_field_${p.phaseId}_${f.id}" type="file" class="input">
-                            ${fileLabel}
-                        </div>
-                    `;
-                }
-                return `
-                    <div class="form-group">
-                        <label class="form-label">${f.label}${requiredMark}</label>
-                        <input id="phase_field_${p.phaseId}_${f.id}" class="input" value="${val ? String(val).replace(/\"/g, '&quot;') : ''}" placeholder="请输入">
+
+            // Score section
+            let scoreSection = '';
+            if (scoringMode === 'manual') {
+                scoreSection = `
+                    <div class="phase-score-box">
+                        <label class="form-label">阶段得分 <span style="color: var(--ant-text-tertiary); font-size: 12px;">（手动录入 0-100）</span></label>
+                        ${editable
+                            ? `<input class="input phase-score-input" id="phase_score_${p.phaseId}" type="number" min="0" max="100" value="${score ?? ''}" placeholder="请输入阶段得分">`
+                            : `<div class="phase-score-pill ${score === null || score === undefined ? 'is-empty' : ''}" style="font-size: 16px; padding: 4px 16px;">${score ?? '--'}</div>`
+                        }
                     </div>
                 `;
-            }).join('');
-            const scoreBox = scoringMode === 'manual'
-                ? `
+            } else {
+                scoreSection = `
                     <div class="phase-score-box">
-                        <label class="form-label required">阶段得分（0-100）</label>
-                        <input class="input phase-score-input" id="phase_score_${p.phaseId}" type="number" min="0" max="100" value="${score ?? ''}" placeholder="请输入阶段得分">
-                    </div>
-                `
-                : `
-                    <div class="phase-score-box">
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap: 12px; flex-wrap:wrap;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
                             <div>
-                                <div style="font-weight:650; color:#0f172a;">规则得分录入</div>
-                                <div style="margin-top:4px; color:#64748b; font-size: 12px;">至少录入 2 条规则得分后自动计算阶段得分。</div>
+                                <div style="font-weight: 500; color: var(--ant-text);">规则得分</div>
+                                <div style="margin-top: 2px; color: var(--ant-text-tertiary); font-size: 12px;">阶段得分 = 规则得分均值（自动计算，至少 2 条）</div>
                             </div>
                             <div class="phase-score-pill ${score === null || score === undefined ? 'is-empty' : ''}">
-                                阶段得分：${score === null || score === undefined ? '--' : score}
+                                阶段得分：${score ?? '--'}
                             </div>
                         </div>
-                        <div style="margin-top: 12px; display:flex; flex-direction:column; gap: 12px;">
-                            ${ruleRows || '<div style="color:#94a3b8;">暂无规则绑定，请先在部门配置页绑定规则。</div>'}
-                        </div>
+                        ${bindings.length
+                            ? `<div style="display: flex; flex-direction: column; gap: 8px;">${ruleRows}</div>`
+                            : `<div style="color: var(--ant-text-tertiary);">暂无规则绑定，请在部门配置页绑定规则</div>`
+                        }
                     </div>
                 `;
+            }
+
             return `
-                <div class="tab-content ${i === 0 ? 'active' : ''}" id="eval_phase_tab_${p.phaseId}">
-                    <div class="phase-detail-header">
-                        <div>
-                            <div style="font-weight: 750; color:#0f172a; font-size: 16px;">${tpl?.name || p.phaseId}</div>
-                            <div style="margin-top:6px; color:#64748b; font-size: 13px;">${tpl?.description || '-'}</div>
-                        </div>
-                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                            <span class="status-badge ${scoringMode === 'rules_avg' ? 'status-info' : ''}">${scoringMode === 'rules_avg' ? '规则均分' : '手工录入'}</span>
-                            <span class="phase-score-pill ${score === null || score === undefined ? 'is-empty' : ''}">得分：${score === null || score === undefined ? '--' : score}</span>
-                        </div>
-                    </div>
-                    <div class="phase-detail-body">
-                        ${fields.length ? `
-                            <div class="phase-form-grid">
-                                ${fieldRows}
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div class="phase-preview-index">${idx + 1}</div>
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: var(--ant-text);">${tpl?.name || p.phaseId}</div>
+                                ${tpl?.description ? `<div style="margin-top: 2px; color: var(--ant-text-tertiary); font-size: 13px;">${tpl.description}</div>` : ''}
                             </div>
-                        ` : '<div style="color:#94a3b8;">该阶段未配置表单字段</div>'}
-                        ${scoreBox}
-                        <div class="phase-detail-actions">
-                            <button class="btn btn-primary" onclick="App.saveEvaluationPhaseFromDetail('${evaluation.id}', '${p.phaseId}')">保存阶段</button>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span class="status-badge ${scoringMode === 'rules_avg' ? 'status-info' : ''}">${scoringMode === 'rules_avg' ? '自动计算' : '手动录入'}</span>
+                            <span style="font-size: 20px; font-weight: 600; color: ${scoreColor};">${score ?? '--'}</span>
                         </div>
                     </div>
+                    ${fields.length ? `<div class="phase-form-grid" style="margin-bottom: 16px;">${fieldRows}</div>` : ''}
+                    ${scoreSection}
+                    ${editable ? `<div style="margin-top: 12px; display: flex; justify-content: flex-end;"><button class="btn btn-primary" onclick="App.saveEvaluationPhaseFromDetail('${evaluation.id}', '${p.phaseId}')">保存阶段</button></div>` : ''}
                 </div>
             `;
         }).join('');
+
         this.renderWithLayout(`
-            <div class="container">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:16px;">
-                    <div>
-                        <div class="back-link" onclick="Router.navigate('/evaluations')">← 返回列表</div>
-                        <h2 style="margin-bottom: 6px;">${evaluation.warehouseName}</h2>
-                        <div style="color: #666; font-size: 14px;">所属部门: ${evaluation.departmentName || '-'}</div>
-                        <div style="color: #666; font-size: 14px; margin-top: 4px;">评估时间: ${this.formatDate(evaluation.startTime)}</div>
-                    </div>
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn btn-primary" ${completed ? `onclick="App.openEvaluationReport('${evaluation.id}')"` : 'disabled'}>生成报告</button>
-                        <button class="btn btn-default" onclick="API.exportEvaluationResult('${evaluation.id}', 'json')">下载</button>
-                    </div>
-                </div>
+            <div class="container" style="max-width: 1100px;">
+                <div class="back-link" onclick="Router.navigate('/evaluations')">← 返回列表</div>
 
                 <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
-                        <div></div>
-                        <div>${this.getStatusBadge(evaluation.status)}</div>
-                    </div>
-                    ${completed ? `
-                        <div class="evaluation-overview-completed">
-                            <div class="evaluation-score-bubble ${this.getGradeClass(evaluation.grade)}">
-                                <div class="evaluation-score-value">${evaluation.score ?? '-'}</div>
-                                <div class="evaluation-score-label">得分</div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+                        <div>
+                            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                                <span class="status-badge status-info">${evalType}</span>
+                                ${this.getStatusBadge(evaluation.status)}
                             </div>
-                            <div class="evaluation-overview-metrics">
-                                <div class="overview-card">
-                                    <div class="overview-card-value">${evaluation.grade || '-'}</div>
-                                    <div class="overview-card-label">等级</div>
+                            <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 4px;">${evalTitle}</h2>
+                            <div style="color: var(--ant-text-tertiary); font-size: 13px;">
+                                ${evaluation.departmentName ? `部门：${evaluation.departmentName}` : ''}
+                                ${evaluation.startTime ? ` · ${this.formatDate(evaluation.startTime)}` : ''}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            ${completed ? `<button class="btn btn-primary" onclick="App.openEvaluationReport('${evaluation.id}')">生成报告</button>` : ''}
+                            <button class="btn btn-default" onclick="API.exportEvaluationResult('${evaluation.id}', 'json')">导出</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--ant-border-secondary);">
+                        ${totalScore !== null && totalScore !== undefined ? `
+                            <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+                                <div class="evaluation-score-bubble ${this.getGradeClass(totalGrade)}" style="width: 100px; height: 100px;">
+                                    <div class="evaluation-score-value" style="font-size: 32px;">${totalScore}</div>
+                                    <div class="evaluation-score-label">总分</div>
                                 </div>
-                                <div class="overview-card">
-                                    <div class="overview-card-value">${issueCount}</div>
-                                    <div class="overview-card-label">问题统计数</div>
+                                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <div class="overview-card" style="min-width: 72px; padding: 12px 16px;">
+                                        <div class="overview-card-value" style="font-size: 24px;">${totalGrade || '-'}</div>
+                                        <div class="overview-card-label">等级</div>
+                                    </div>
+                                    <div class="overview-card" style="min-width: 72px; padding: 12px 16px;">
+                                        <div class="overview-card-value" style="font-size: 24px;">${effectivePhases.length}</div>
+                                        <div class="overview-card-label">阶段</div>
+                                    </div>
+                                    <div class="overview-card" style="min-width: 72px; padding: 12px 16px;">
+                                        <div class="overview-card-value" style="font-size: 24px;">${issueCount}</div>
+                                        <div class="overview-card-label">问题</div>
+                                    </div>
+                                </div>
+                                <div style="flex: 1; min-width: 200px;">
+                                    <div style="font-size: 12px; color: var(--ant-text-tertiary); margin-bottom: 4px;">总分 = 各阶段得分均值</div>
+                                    <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                        ${phaseScoreSummary.map(ps => `
+                                            <span class="phase-score-pill ${ps.score === null || ps.score === undefined ? 'is-empty' : ''}">${ps.name}：${ps.score ?? '--'}</span>
+                                        `).join('')}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ` : `
-                        <div style="margin-bottom: 6px;">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;">
-                                <span>评估进度</span>
-                                <span>${evaluation.progress || 0}%</span>
+                        ` : `
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px;">
+                                    <span>评估进度</span>
+                                    <span>${evaluation.progress || 0}%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${evaluation.progress || 0}%;"></div>
+                                </div>
+                                <div style="margin-top: 8px; font-size: 12px; color: var(--ant-text-tertiary);">
+                                    总分 = 各阶段得分均值 · 所有阶段完成后自动计算
+                                </div>
                             </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${evaluation.progress || 0}%;"></div>
-                            </div>
-                        </div>
-                    `}
+                        `}
+                    </div>
                 </div>
 
-                <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap; margin-bottom: 12px;">
-                        <h3 style="font-size: 18px; margin-bottom: 0;">阶段评估</h3>
-                        ${evaluation.departmentId ? `<button class="btn btn-sm btn-default" onclick="Router.navigate('/departments/${evaluation.departmentId}/config')">配置部门阶段</button>` : ''}
-                    </div>
-                    ${effectivePlanPhases.length ? `
-                        <div class="tab-nav">
-                            ${phaseTabs}
-                        </div>
-                        ${phaseContents}
-                    ` : `<div style="color:#8c8c8c;">该评估未关联部门阶段配置</div>`}
+                <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="font-size: 16px; font-weight: 600;">阶段评估 <span style="font-weight: 400; color: var(--ant-text-tertiary); font-size: 13px;">（${isPhaseEval ? '单阶段' : `共 ${effectivePhases.length} 个阶段`}）</span></h3>
+                    ${editable && evaluation.departmentId ? `<button class="btn btn-sm btn-default" onclick="Router.navigate('/departments/${evaluation.departmentId}/config')">编辑阶段配置</button>` : ''}
                 </div>
+                ${effectivePhases.length ? phaseSections : '<div class="card"><div style="color: var(--ant-text-tertiary);">该评估未关联部门阶段配置</div></div>'}
 
-                <details class="card" style="padding: 18px 20px;">
-                    <summary style="cursor:pointer; font-weight: 650; color:#0f172a;">维度得分（参考）</summary>
-                    <div style="margin-top: 14px; color:#64748b; font-size: 13px; line-height:1.7;">
-                        维度规则集仅用于分数展示，不参与本次部门/阶段主评分口径。
-                    </div>
-                    <div style="margin-top: 14px;">
-                        ${this.renderEvaluationDimensionTable(evaluation)}
-                    </div>
-                </details>
-
-                <div class="card">
-                    <h3 style="font-size: 18px; margin-bottom: 16px;">问题清单</h3>
-                    ${evaluation.issues?.length > 0 ? `
-                        <div style="display: flex; flex-direction: column; gap: 12px;">
-                            ${evaluation.issues.map((issue, idx) => {
+                ${evaluation.issues?.length > 0 ? `
+                    <div class="card">
+                        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">问题清单 <span style="font-weight: 400; color: var(--ant-text-tertiary); font-size: 13px;">（${issueCount} 条）</span></h3>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            ${evaluation.issues.map(issue => {
                                 const meta = issueSeverityMeta[issue.severity] || issueSeverityMeta.low;
-                                const issueName = (issue.description || '').split(/[，。]/)[0] || `问题${idx + 1}`;
                                 return `
-                                    <div class="evaluation-issue-item" style="background:${meta.bg}; border: 1px solid ${meta.color}33;">
-                                        <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom:8px;">
-                                            <div>
-                                                <div style="font-weight:600; color:#0f172a;">所属规则名称：${issue.rule}</div>
-                                                <div style="margin-top:4px; color:#334155;">问题名称：${issueName}</div>
-                                            </div>
-                                            <span class="status-badge" style="background:${meta.bg}; color:${meta.color};">严重度：${meta.label}</span>
+                                    <div class="evaluation-issue-item" style="background: ${meta.bg}; border: 1px solid ${meta.color}22; border-radius: var(--ant-radius-lg);">
+                                        <div style="display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 4px;">
+                                            <span style="font-weight: 500; color: var(--ant-text);">${issue.rule}</span>
+                                            <span class="status-badge" style="background: ${meta.bg}; color: ${meta.color};">严重度：${meta.label}</span>
                                         </div>
-                                        <div style="color:#334155; line-height:1.6;">问题描述：${issue.description || '-'}</div>
+                                        <div style="color: var(--ant-text-secondary); font-size: 13px;">${issue.description || '-'}</div>
+                                        ${issue.suggestion ? `<div style="margin-top: 4px; color: var(--ant-text-tertiary); font-size: 12px;">建议：${issue.suggestion}</div>` : ''}
                                     </div>
                                 `;
                             }).join('')}
                         </div>
-                    ` : '<div style="color:#8c8c8c;">暂无问题</div>'}
-                </div>
+                    </div>
+                ` : ''}
             </div>
         `, 'eval-list');
-    },
-
-    renderEvaluationDimensionTable(evaluation) {
-        const ruleSets = API.ruleSets || [];
-        const completed = evaluation.status === 'completed';
-        const renderRuleRows = (ruleSetId) => {
-            const rules = API.rules[ruleSetId] || [];
-            const dimScore = evaluation.dimensionScores?.[ruleSetId]?.score;
-            return rules.map(rule => {
-                let scoreText = '-';
-                if (completed && dimScore !== null && dimScore !== undefined) {
-                    const seed = (rule.id || '').split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
-                    const offset = (seed % 9) - 4;
-                    const score = Math.max(0, Math.min(100, Math.round(dimScore + offset)));
-                    scoreText = String(score);
-                }
-                return `
-                    <tr>
-                        <td>${rule.name}</td>
-                        <td>${rule.weight}</td>
-                        <td>${scoreText}</td>
-                    </tr>
-                `;
-            }).join('');
-        };
-        return `
-            <div class="tab-nav">
-                ${ruleSets.map((d, i) => `
-                    <div class="tab-item dim-tab-item ${i === 0 ? 'active' : ''}" onclick="App.switchEvalRuleSetTab('${d.id}', this)">${d.name}</div>
-                `).join('')}
-            </div>
-            ${ruleSets.map((rs, i) => `
-                <div class="tab-content ${i === 0 ? 'active' : ''}" id="eval_rule_tab_${rs.id}">
-                    <table class="rule-table">
-                        <thead>
-                            <tr>
-                                <th>评估规则名称</th>
-                                <th style="width: 120px;">权重</th>
-                                <th style="width: 120px;">得分</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${renderRuleRows(rs.id)}
-                        </tbody>
-                    </table>
-                </div>
-            `).join('')}
-        `;
-    },
-
-    switchEvalPhaseTab(phaseId, el) {
-        document.querySelectorAll('.phase-tab-item').forEach(item => item.classList.remove('active'));
-        el.classList.add('active');
-        document.querySelectorAll('[id^="eval_phase_tab_"]').forEach(tab => tab.classList.remove('active'));
-        const target = document.getElementById(`eval_phase_tab_${phaseId}`);
-        if (target) target.classList.add('active');
     },
 
     async saveEvaluationPhaseFromDetail(evaluationId, phaseId) {
@@ -2151,8 +2120,7 @@ const App = {
 
         let score = null;
         let ruleScores = null;
-        const isPhaseEval = (evaluation?.evaluationDimension || (evaluation?.phaseId ? 'phase' : 'department')) === 'phase';
-        const mode = isPhaseEval ? 'manual' : (tpl?.scoringMode || 'manual');
+        const mode = tpl?.scoringMode || 'manual';
         if (mode === 'manual') {
             const val = document.getElementById(`phase_score_${phaseId}`)?.value;
             score = val === '' || val === undefined ? null : Number(val);
