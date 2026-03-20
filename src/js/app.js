@@ -228,7 +228,7 @@ const App = {
         const n = Number(score);
         if (Number.isNaN(n)) return '#8c8c8c';
         if (n >= 90) return '#52c41a';
-        if (n >= 80) return '#1890ff';
+        if (n >= 80) return '#1677ff';
         if (n >= 60) return '#faad14';
         return '#ff4d4f';
     },
@@ -238,7 +238,7 @@ const App = {
     getGradeStyle(grade) {
         const map = {
             A: { color: '#52c41a', bg: 'rgba(82,196,26,0.14)' },
-            B: { color: '#1890ff', bg: 'rgba(24,144,255,0.14)' },
+            B: { color: '#1677ff', bg: 'rgba(22,119,255,0.1)' },
             C: { color: '#faad14', bg: 'rgba(250,173,20,0.16)' },
             D: { color: '#ff4d4f', bg: 'rgba(255,77,79,0.14)' },
         };
@@ -746,7 +746,7 @@ const App = {
         const templates = await API.getPhaseTemplates();
         const fieldPreview = (tpl) => {
             const fields = tpl?.formSchema?.fields || [];
-            const badges = fields.slice(0, 3).map(f => `<span class="status-badge" style="background: rgba(24,144,255,0.10); color:#1677ff;">${f.type}</span>`).join('');
+            const badges = fields.slice(0, 3).map(f => `<span class="status-badge" style="background: #e6f4ff; color:#1677ff;">${f.type}</span>`).join('');
             const more = fields.length > 3 ? `<span class="status-badge" style="background: rgba(15,23,42,0.08); color:#334155;">+${fields.length - 3}</span>` : '';
             return `<div style="display:flex; gap:8px; flex-wrap:wrap;">${badges}${more}</div>`;
         };
@@ -1049,7 +1049,7 @@ const App = {
                                 <div class="report-title">${rule.name}</div>
                                 <div class="report-meta">${rule.description || '-'}</div>
                                 <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-                                    <span class="status-badge" style="background: rgba(24,144,255,0.10); color:#1677ff;">${rule.category || '-'}</span>
+                                    <span class="status-badge" style="background: #e6f4ff; color:#1677ff;">${rule.category || '-'}</span>
                                     <span class="status-badge ${rule.enabled !== false ? 'status-success' : 'status-error'}">${rule.enabled !== false ? '启用' : '禁用'}</span>
                                 </div>
                                 <div class="report-actions" style="margin-top: 12px;">

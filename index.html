@@ -16,35 +16,23 @@
     <link rel="stylesheet" href="src/css/style.css">
     
     <style>
-        /* 页面级基础变量与政务平台色彩体系 */
-        :root {
-            --gov-primary: #1a3b5c;       /* 稳重政务蓝 */
-            --bg-base: #f0f4f8;           /* 层次底层背景 */
-            --bg-surface: #ffffff;        /* 容器层背景 */
-            --skeleton-base: #e2e8f0;     /* 骨架底色 */
-        }
-        
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
-            font-family: 'Noto Sans SC', sans-serif;
-            background-color: var(--bg-base);
-            /* 微妙的背景渐变光影，提升高级感 */
-            background-image: radial-gradient(circle at 50% 0%, #fbfdfd 0%, #f0f4f8 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+            background: #f5f5f5;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
         noscript {
             display: block;
-            padding: 16px;
+            padding: 12px 16px;
             text-align: center;
-            background-color: #fef3c7;
-            color: #92400e;
-            font-weight: 500;
+            background: #fffbe6;
+            color: #d48806;
             font-size: 14px;
-            border-bottom: 1px solid #f59e0b;
+            border-bottom: 1px solid #ffe58f;
         }
 
         #app {
@@ -54,80 +42,76 @@
             overflow: hidden;
         }
 
-        /* ----- 精致骨架屏样式 ----- */
-        .sk-header {
-            height: 60px;
-            background: var(--gov-primary);
-            display: flex;
-            align-items: center;
-            padding: 0 24px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            z-index: 10;
-        }
-        .sk-logo {
-            width: 220px;
-            height: 24px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
-        }
         .sk-body {
             display: flex;
             flex: 1;
             overflow: hidden;
         }
         .sk-sidebar {
-            width: 260px;
-            background: var(--bg-surface);
-            padding: 24px 16px;
-            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.03);
-            z-index: 5;
+            width: 240px;
+            background: #fff;
+            padding: 16px 8px;
+            border-right: 1px solid #f0f0f0;
+        }
+        .sk-sidebar-logo {
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #f0f0f0;
+            margin: 0 12px 12px;
+        }
+        .sk-sidebar-logo-bar {
+            width: 120px;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 4px;
         }
         .sk-menu-item {
-            height: 40px;
-            background: var(--skeleton-base);
+            height: 36px;
+            background: #f5f5f5;
             border-radius: 6px;
-            margin-bottom: 12px;
+            margin-bottom: 4px;
         }
         .sk-main {
             flex: 1;
-            padding: 32px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 16px;
             overflow-y: auto;
+            background: #f5f5f5;
         }
         .sk-title {
-            width: 250px;
-            height: 32px;
-            background: var(--skeleton-base);
+            width: 200px;
+            height: 28px;
+            background: #e8e8e8;
             border-radius: 6px;
         }
         .sk-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
         }
         .sk-card {
-            background: var(--bg-surface);
-            border-radius: 12px;
-            padding: 24px;
-            height: 180px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-            border: 1px solid rgba(226, 232, 240, 0.8);
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            height: 160px;
+            border: 1px solid #f0f0f0;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
         }
         .sk-line {
             height: 14px;
-            background: var(--skeleton-base);
+            background: #f0f0f0;
             border-radius: 4px;
         }
-        .sk-line.short { width: 35%; height: 20px; margin-bottom: 8px; }
+        .sk-line.short { width: 35%; height: 18px; margin-bottom: 4px; }
         .sk-line.medium { width: 65%; }
         .sk-line.long { width: 100%; }
 
-        /* 高级流光动画 */
         .shimmer {
             position: relative;
             overflow: hidden;
@@ -135,36 +119,19 @@
         .shimmer::after {
             content: '';
             position: absolute;
-            top: 0; right: 0; bottom: 0; left: 0;
+            inset: 0;
             transform: translateX(-100%);
-            background-image: linear-gradient(
-                90deg,
-                rgba(255, 255, 255, 0) 0,
-                rgba(255, 255, 255, 0.4) 20%,
-                rgba(255, 255, 255, 0.6) 60%,
-                rgba(255, 255, 255, 0)
-            );
-            animation: shimmer 2s infinite ease-out;
-        }
-        .sk-header .shimmer::after {
-            background-image: linear-gradient(
-                90deg,
-                rgba(255, 255, 255, 0) 0,
-                rgba(255, 255, 255, 0.08) 20%,
-                rgba(255, 255, 255, 0.15) 60%,
-                rgba(255, 255, 255, 0)
-            );
+            background: linear-gradient(90deg, transparent 0, rgba(0,0,0,0.04) 20%, rgba(0,0,0,0.05) 60%, transparent);
+            animation: shimmer 1.5s infinite ease-out;
         }
         @keyframes shimmer {
             100% { transform: translateX(100%); }
         }
 
-        /* 移动端适配 */
         @media (max-width: 768px) {
             .sk-sidebar { display: none; }
             .sk-main { padding: 16px; }
             .sk-grid { grid-template-columns: 1fr; }
-            .sk-header { padding: 0 16px; }
         }
     </style>
 </head>
@@ -175,15 +142,16 @@
 
     <!-- 应用挂载点与骨架屏 -->
     <div id="app">
-        <header class="sk-header">
-            <div class="sk-logo shimmer"></div>
-        </header>
         <div class="sk-body">
             <aside class="sk-sidebar">
+                <div class="sk-sidebar-logo">
+                    <div class="sk-sidebar-logo-bar shimmer"></div>
+                </div>
                 <div class="sk-menu-item shimmer"></div>
                 <div class="sk-menu-item shimmer" style="width: 85%;"></div>
                 <div class="sk-menu-item shimmer" style="width: 90%;"></div>
                 <div class="sk-menu-item shimmer" style="width: 75%;"></div>
+                <div class="sk-menu-item shimmer" style="width: 80%;"></div>
             </aside>
             <main class="sk-main">
                 <div class="sk-title shimmer"></div>
