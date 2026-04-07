@@ -1,0 +1,57 @@
+services:
+  mysql:
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/mysql:8.0.42
+    container_name: ruoyi-local-mysql
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --explicit_defaults_for_timestamp=true
+      - --lower_case_table_names=1
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./local/mysql-init:/docker-entrypoint-initdb.d:ro
+      - ../sql:/initdb/sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-ppassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: ruoyi-local-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "ruoyi123"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "ruoyi123", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  nacos:
+    image: nacos/nacos-server:v2.3.2
+    container_name: ruoyi-local-nacos
+    environment:
+      TZ: Asia/Shanghai
+      MODE: standalone
+      JAVA_OPTS: "-Xms256m -Xmx512m"
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    volumes:
+      - nacos_logs:/root/nacos/logs
+
+volumes:
+  mysql_data:
+  redis_data:
+  nacos_logs:
