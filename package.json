@@ -1,0 +1,13 @@
+{
+  "name": "ai-project",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'No dev server configured'",
+    "build": "echo 'No build configured'",
+    "lint": "echo 'No linter configured'"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}
