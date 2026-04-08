@@ -8,22 +8,30 @@ pnpm-lock.yaml
 dist/
 build/
 .out/
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+.flattened-pom.xml
 
-# Environment
-.env
-.env.local
-.env.*.local
-
-# Editor
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*.swn
 *~
+*.iml
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Environment (keep templates, ignore secrets)
+.env.*.local
+*.pem
+*.key
 
 # Logs
 *.log
@@ -35,3 +43,9 @@ coverage/
 
 # Claude Code
 .claude/
+
+# Codex
+.codex/
+
+# Local git worktree metadata
+.tree/
