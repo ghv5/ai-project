@@ -88,3 +88,58 @@ Maven profiles are activated via `@profiles.active@`, `@nacos.server@` etc. in `
 - **Adding a component**: Place in `src/components/` or relevant view subdirectory. Use UnoCSS for styling (priority over custom CSS).
 - **State management**: Use Pinia stores in `src/store/modules/`. Follow existing module patterns.
 - **Backend service**: Add module under `ruoyi-modules/`, register with Nacos. Config via `application.yml` + Nacos remote config.
+
+## Collaboration Protocol: Claude Code + Codex
+
+### Roles
+
+- **Claude Code (决策者)**: 负责需求分析、架构设计、方案决策、代码审查、质量把控。不直接执行大量编码工作。
+- **Codex (执行者)**: 负责具体代码实现、调试、测试编写、重构执行。通过 `codex-plugin-cc` 插件连接。
+
+### Workflow
+
+#### Phase 1: 讨论阶段 (Discussion)
+
+1. Claude Code 分析用户需求，拆解任务，形成初步方案
+2. 通过 Codex 插件发起讨论，将方案发给 Codex，征求技术可行性反馈
+3. Codex 从实现角度评估：技术选型、潜在陷阱、RuoYi 框架兼容性、依赖影响
+4. 双方迭代讨论，直到方案收敛
+5. Claude Code 最终拍板，形成明确的实施计划（任务列表、文件变更清单、验收标准）
+
+#### Phase 2: 执行阶段 (Execution)
+
+1. Claude Code 将实施计划通过 Codex 插件下发给 Codex
+2. Codex 独立完成编码、自测、diff 输出
+3. Claude Code 接收 Codex 返回的 unified diff patch
+4. Claude Code 执行 Code Review：
+   - 检查是否符合 RuoYi 框架规范
+   - 检查是否影响现有功能
+   - 检查代码质量（冗余、安全、性能）
+5. 如有问题，返回修改意见给 Codex 迭代
+6. 审核通过后，Claude Code 将 patch 应用到项目
+
+### RuoYi Framework Guidelines
+
+所有实现必须严格遵循 RuoYi 框架约定：
+
+- **后端**: 继承 `BaseController`，使用 `@SaCheckPermission` 做权限校验，返回 `R<T>` 统一响应体，Entity 继承 `BaseEntity`，Mapper 使用 MyBatis-Plus `BaseMapper`
+- **前端**: 页面布局遵循 `NCard` + `NDataTable` + 搜索栏模式，API 调用使用 `@sa/axios`，表格使用 `useTable` hook
+- **权限**: 权限标识格式 `{module}:{entity}:{action}`，如 `system:user:add`
+- **数据库**: 使用 MyBatis-Plus 注解，禁止手写 SQL（除非复杂查询），分页使用 `PageQuery`
+
+### Skills Usage
+
+- `using-superpowers`: **手动触发** — 用户通过 `/using-superpowers` 主动调用，不自动加载
+- `codex:setup` / `codex:rescue`: 与 Codex 的连接和任务委派
+- `brainstorming`: 创造性功能开发前的讨论阶段
+- `writing-plans` / `executing-plans`: 计划编写与执行分离
+- `verification-before-completion`: 交付前必须验证
+- `simplify`: 代码审查阶段调用，检查复用性和效率
+
+### Constraints
+
+- 沙箱安全：Codex 不直接写文件系统，输出 unified diff patch
+- 代码主权：Codex 产出为 Prototype，Claude Code 负责最终重构把关
+- 风格：精简高效、无冗余、非必要不注释
+- 影响范围：仅对需求做针对性改动，严禁影响其他功能
+- 判断依据：以项目代码和官方文档为准，调用非内置库时必须联网搜索确认
