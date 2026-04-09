@@ -49,3 +49,8 @@ coverage/
 
 # Local git worktree metadata
 .tree/
+
+# Local runtime artifacts
+**/.local-run/
+**/.local-logs/
+*.pid

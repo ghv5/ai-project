@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.dromara</groupId>
-    <artifactId>car-portal-backend</artifactId>
+    <artifactId>ruoyi-cloud-plus</artifactId>
     <version>${revision}</version>
 
     <name>Car Portal Backend</name>
@@ -531,4 +531,3 @@
     </pluginRepositories>
 
 </project>
-
