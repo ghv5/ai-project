@@ -5,6 +5,11 @@
 - `car-portal-frontend`：Vue 3 + TypeScript + Vite + pnpm 的管理端前端
 - `car-portal-backend`：Spring Boot / Spring Cloud 微服务后端（Maven 多模块）
 
+设计文档入口：
+
+- 架构设计文档：`docs/architecture-design.md`
+- 数据库设计文档：`docs/database-design.md`
+
 当前推荐运行模式：
 
 - Nacos 使用 Docker 启动并集中管理配置
