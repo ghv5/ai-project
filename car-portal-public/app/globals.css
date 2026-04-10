@@ -657,6 +657,86 @@ input {
   font-weight: 700;
 }
 
+.video-case-card {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.video-case-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 52px rgba(17, 63, 150, 0.16);
+}
+
+.video-cover {
+  position: relative;
+  height: 160px;
+  border-radius: 12px;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(31, 99, 234, 0.18), rgba(83, 179, 255, 0.25)),
+    linear-gradient(160deg, #ddebff, #bfd8ff);
+}
+
+.video-cover::after {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.video-play {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--primary);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.video-duration {
+  position: absolute;
+  right: 16px;
+  bottom: 18px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(19, 35, 61, 0.72);
+  color: #fff;
+  font-size: 12px;
+}
+
+.video-case-card h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.video-case-card p {
+  margin: 0;
+  min-height: 48px;
+  color: var(--text-sub);
+  line-height: 1.6;
+}
+
+.video-case-card a {
+  align-self: flex-start;
+  color: var(--primary);
+  font-weight: 700;
+}
+
 .case-meta {
   display: flex;
   justify-content: space-between;
@@ -672,6 +752,72 @@ input {
   margin-top: 38px;
 }
 
+.cases-banner {
+  max-width: 1280px;
+  margin: 24px auto 0;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 22px;
+}
+
+.cases-banner-copy,
+.cases-banner-visual {
+  min-height: 260px;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+}
+
+.cases-banner-copy {
+  padding: 36px 34px;
+  background:
+    linear-gradient(160deg, rgba(22, 93, 255, 0.14), rgba(123, 97, 255, 0.08)),
+    rgba(255, 255, 255, 0.9);
+}
+
+.cases-banner-copy h1 {
+  margin: 0;
+  font-size: 42px;
+}
+
+.cases-banner-copy p:last-child {
+  margin: 14px 0 0;
+  color: var(--text-sub);
+  line-height: 1.7;
+}
+
+.cases-banner-visual {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(150deg, rgba(9, 49, 139, 0.94), rgba(22, 93, 255, 0.86)),
+    radial-gradient(circle at 72% 28%, rgba(116, 198, 255, 0.34), transparent 36%);
+}
+
+.cases-banner-frame {
+  position: absolute;
+  inset: 34px;
+  border-radius: 18px;
+  border: 1px solid rgba(196, 227, 255, 0.22);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03));
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 22px;
+  color: #edf5ff;
+  backdrop-filter: blur(6px);
+}
+
+.cases-banner-frame span:first-child {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.cases-banner-frame span:last-child {
+  margin-top: 8px;
+  color: #c8dcff;
+}
+
 .cases-hero h1 {
   margin: 0;
   font-size: 42px;
@@ -685,7 +831,7 @@ input {
 .cases-search {
   display: flex;
   gap: 10px;
-  max-width: 560px;
+  max-width: 760px;
 }
 
 .cases-search input {
@@ -705,6 +851,48 @@ input {
   color: #fff;
   font-weight: 700;
   cursor: pointer;
+}
+
+.secondary-btn {
+  background: #edf4ff !important;
+  color: var(--primary) !important;
+  border: 1px solid #cfe0fb !important;
+}
+
+.filters-block {
+  max-width: 1280px;
+  margin: 32px auto 0;
+  padding: 0 20px;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.filter-row span {
+  color: #607593;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.filter-row button {
+  border: 1px solid #d6e3f7;
+  background: rgba(255, 255, 255, 0.9);
+  color: #567097;
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.filter-row button.active {
+  border-color: rgba(22, 93, 255, 0.2);
+  background: linear-gradient(150deg, rgba(22, 93, 255, 0.14), rgba(123, 97, 255, 0.12));
+  color: var(--primary);
+  font-weight: 700;
 }
 
 .detail-shell {
@@ -942,6 +1130,10 @@ input {
     grid-template-columns: 1fr;
   }
 
+  .cases-banner {
+    grid-template-columns: 1fr;
+  }
+
   .service-layout {
     grid-template-columns: 170px 1fr;
   }
@@ -1003,5 +1195,10 @@ input {
 
   .cases-search button {
     width: 100%;
+  }
+
+  .filter-row {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
