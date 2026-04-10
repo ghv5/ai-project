@@ -915,11 +915,31 @@ input {
 }
 
 .detail-cover {
+  position: relative;
   border-radius: 12px;
-  min-height: 220px;
+  min-height: 240px;
   background:
     linear-gradient(135deg, rgba(31, 99, 234, 0.18), rgba(83, 179, 255, 0.25)),
     linear-gradient(160deg, #dfecff, #bfd9fb);
+}
+
+.detail-kicker {
+  margin: 0 0 8px;
+  color: var(--primary);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.video-play.large {
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+}
+
+.detail-duration {
+  right: 18px;
+  bottom: 18px;
 }
 
 .detail-main h1 {
