@@ -6,10 +6,14 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
+import org.dromara.portal.domain.dto.NewsItemDto;
+import org.dromara.portal.domain.dto.ServiceCenterItemDto;
+import org.dromara.portal.domain.dto.StatItemDto;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 门户首页内容表 portal_home_content
@@ -41,25 +45,25 @@ public class PortalHomeContent implements Serializable {
      * 流程步骤
      */
     @TableField(value = "flow_steps_json", typeHandler = JacksonTypeHandler.class)
-    private String flowSteps;
+    private List<String> flowSteps;
 
     /**
      * 统计项
      */
     @TableField(value = "stats_json", typeHandler = JacksonTypeHandler.class)
-    private String stats;
+    private List<StatItemDto> stats;
 
     /**
      * 服务中心项
      */
     @TableField(value = "services_json", typeHandler = JacksonTypeHandler.class)
-    private String services;
+    private List<ServiceCenterItemDto> services;
 
     /**
      * 新闻项
      */
     @TableField(value = "news_json", typeHandler = JacksonTypeHandler.class)
-    private String news;
+    private List<NewsItemDto> news;
 
     /**
      * 版本号
