@@ -99,6 +99,42 @@ curl -s http://127.0.0.1:8080/auth/code
 
 预期：返回 JSON 且 `code` 为 `200`。
 
+## 2.6 门户联调（car-portal-public + ruoyi-portal + mock-sso）
+
+1. 启动门户 mock 服务：
+
+```bash
+cd car-portal-public-mock
+npm install
+npm run dev
+```
+
+2. 构建并启动门户后端服务：
+
+```bash
+cd car-portal-backend
+mvn -Pdev -pl ruoyi-modules/ruoyi-portal -am -DskipTests package
+java -jar ruoyi-modules/ruoyi-portal/target/ruoyi-portal.jar
+```
+
+3. 启动网关与基础依赖服务（auth/system/gateway），确保 `/portal/**` 路由可达。
+
+4. 启动门户前端：
+
+```bash
+cd car-portal-public
+pnpm install
+pnpm dev
+```
+
+5. 快速验证：
+
+```bash
+curl -s http://127.0.0.1:8080/portal/home
+curl -s http://127.0.0.1:8080/portal/cases
+curl -s -X POST http://127.0.0.1:3001/mock/annotate/exchange
+```
+
 ## 3. 常规修改配置说明
 
 ## 3.1 修改 Nacos 配置（推荐）
