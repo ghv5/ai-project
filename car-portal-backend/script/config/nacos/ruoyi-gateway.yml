@@ -11,6 +11,10 @@ security:
       - /auth/tenant/list
       - /resource/sms/code
       - /resource/sse/close
+      - /portal/home/**
+      - /portal/cases/**
+      - /portal/media/**
+      - /portal/sso/ticket/exchange
       - /*/v3/api-docs
       - /*/error
       - /csrf
@@ -55,6 +59,13 @@ spring:
               uri: lb://ruoyi-resource
               predicates:
                 - Path=/resource/**
+              filters:
+                - StripPrefix=1
+            # 门户服务
+            - id: ruoyi-portal
+              uri: lb://ruoyi-portal
+              predicates:
+                - Path=/portal/**
               filters:
                 - StripPrefix=1
             # workflow服务

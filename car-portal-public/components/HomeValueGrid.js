@@ -18,10 +18,15 @@ const VALUE_ITEMS = [
 export default function HomeValueGrid() {
   return (
     <section className="value-section">
-      <h2>平台定位 / 核心价值</h2>
+      <div className="section-title-wrap">
+        <p className="section-kicker">PLATFORM POSITIONING</p>
+        <h2>平台定位 / 核心价值</h2>
+      </div>
       <div className="value-grid">
-        {VALUE_ITEMS.map(item => (
+        {VALUE_ITEMS.map((item, index) => (
           <article className="value-card" key={item.title}>
+            <div className="value-glow-dot" />
+            <span className="value-index">0{index + 1}</span>
             <div className="value-icon" />
             <h3>{item.title}</h3>
             <p>{item.desc}</p>

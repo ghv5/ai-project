@@ -1,29 +1,29 @@
 datasource:
   system-master:
     # PostgreSQL 业务库
-    url: jdbc:postgresql://localhost:5432/ry-cloud?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
-    username: root
-    password: password
+    url: jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/${PG_DATABASE:ry_cloud}?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
+    username: ${PG_USERNAME:postgres}
+    password: ${PG_PASSWORD:change-me}
   gen:
-    url: jdbc:postgresql://localhost:5432/ry-cloud?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
-    username: root
-    password: password
+    url: jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/${PG_GEN_DATABASE:${PG_DATABASE:ry_cloud}}?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
+    username: ${PG_USERNAME:postgres}
+    password: ${PG_PASSWORD:change-me}
   job:
-    url: jdbc:postgresql://localhost:5432/ry-job?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
-    username: root
-    password: password
+    url: jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/${PG_JOB_DATABASE:ry_job}?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
+    username: ${PG_USERNAME:postgres}
+    password: ${PG_PASSWORD:change-me}
   workflow:
-    url: jdbc:postgresql://localhost:5432/ry-workflow?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
-    username: root
-    password: password
+    url: jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/${PG_WORKFLOW_DATABASE:ry_workflow}?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
+    username: ${PG_USERNAME:postgres}
+    password: ${PG_PASSWORD:change-me}
 #  system-oracle:
 #    url: jdbc:oracle:thin:@//localhost:1521/XE
 #    username: ROOT
-#    password: password
+#    password: ${ORACLE_PASSWORD:change-me}
 #  system-postgres:
-#    url: jdbc:postgresql://localhost:5432/ry-cloud?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
-#    username: root
-#    password: password
+#    url: jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/${PG_DATABASE:ry_cloud}?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
+#    username: ${PG_USERNAME:postgres}
+#    password: ${PG_PASSWORD:change-me}
 
 spring:
   datasource:

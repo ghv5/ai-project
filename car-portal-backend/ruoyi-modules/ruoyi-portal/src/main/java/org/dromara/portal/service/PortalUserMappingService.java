@@ -3,6 +3,7 @@ package org.dromara.portal.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
+import org.dromara.common.core.constant.TenantConstants;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.mybatis.utils.IdGeneratorUtil;
 import org.dromara.portal.domain.PortalUserMapping;
@@ -16,6 +17,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Service
 public class PortalUserMappingService {
+
+    private static final Long DEFAULT_TENANT_ID = Long.valueOf(TenantConstants.DEFAULT_TENANT_ID);
 
     private final PortalUserMappingMapper portalUserMappingMapper;
 
@@ -33,6 +36,7 @@ public class PortalUserMappingService {
 
         PortalUserMapping entity = MapstructUtils.convert(mapping, PortalUserMapping.class);
         entity.setUserId(userId);
+        entity.setTenantId(DEFAULT_TENANT_ID);
         entity.setUpdatedAt(LocalDateTime.now());
         entity.setUpdatedBy(operator);
         entity.setDelFlag("0");

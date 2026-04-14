@@ -6,7 +6,10 @@ export default function HomeNewsBoard({ news = [] }) {
 
   return (
     <section className="news-section" id="news-board">
-      <h2>新闻资讯</h2>
+      <div className="section-title-wrap">
+        <p className="section-kicker">NEWS & UPDATES</p>
+        <h2>新闻资讯</h2>
+      </div>
       <div className="news-layout">
         <article className="news-highlight">
           <p className="news-badge">重点资讯</p>

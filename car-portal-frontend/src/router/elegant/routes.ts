@@ -163,6 +163,44 @@ export const generatedRoutes: GeneratedRoute[] = [
     ]
   },
   {
+    name: 'portal',
+    path: '/portal',
+    component: 'layout.base',
+    meta: {
+      title: 'portal',
+      i18nKey: 'route.portal'
+    },
+    children: [
+      {
+        name: 'portal_case',
+        path: '/portal/case',
+        component: 'view.portal_case',
+        meta: {
+          title: 'portal_case',
+          i18nKey: 'route.portal_case'
+        }
+      },
+      {
+        name: 'portal_home',
+        path: '/portal/home',
+        component: 'view.portal_home',
+        meta: {
+          title: 'portal_home',
+          i18nKey: 'route.portal_home'
+        }
+      },
+      {
+        name: 'portal_mapping',
+        path: '/portal/mapping',
+        component: 'view.portal_mapping',
+        meta: {
+          title: 'portal_mapping',
+          i18nKey: 'route.portal_mapping'
+        }
+      }
+    ]
+  },
+  {
     name: 'social-callback',
     path: '/social-callback',
     component: 'layout.blank$view.social-callback',

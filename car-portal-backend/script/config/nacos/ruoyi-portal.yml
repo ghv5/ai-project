@@ -1,8 +1,24 @@
+spring:
+  datasource:
+    dynamic:
+      # 设置默认的数据源或者数据源组,默认值即为 master
+      primary: master
+      datasource:
+        # 主库数据源
+        master:
+          type: ${spring.datasource.type}
+          driver-class-name: org.postgresql.Driver
+          url: ${datasource.system-master.url}
+          username: ${datasource.system-master.username}
+          password: ${datasource.system-master.password}
+
 portal:
+  media:
+    local-dir: ${PORTAL_MEDIA_DIR:/tmp/portal-media}
   sso:
     ticket-expire-seconds: 60
     session-expire-seconds: 28800
-    callback-secret: portal-change-me
+    callback-secret: ${PORTAL_SSO_CALLBACK_SECRET:change-me}
     allowed-timestamp-skew-seconds: 300
     annotate-entry-url: http://localhost:3000/third-party/annotate
     simulate-entry-url: http://localhost:3000/third-party/simulate

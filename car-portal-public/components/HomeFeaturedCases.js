@@ -1,25 +1,28 @@
 'use client';
 
 import Link from 'next/link';
+import VideoCaseCard from './VideoCaseCard';
 
 export default function HomeFeaturedCases({ cases = [] }) {
+  const displayCases = Array.isArray(cases) ? cases : [];
+
   return (
     <section className="case-section">
       <div className="section-head">
-        <h2>案例精选</h2>
+        <div className="section-title-wrap">
+          <p className="section-kicker">VIDEO CASES</p>
+          <h2>案例精选</h2>
+        </div>
         <Link className="section-more" href="/cases">
           查看更多
         </Link>
       </div>
       <div className="case-grid">
-        {cases.map(item => (
-          <article className="case-card" key={item.caseId}>
-            <div className="case-cover" />
-            <h3>{item.title}</h3>
-            <p>{item.description || ''}</p>
-            <Link href={`/cases/${item.caseId}`}>播放详情</Link>
-          </article>
-        ))}
+        {displayCases.length ? (
+          displayCases.map(item => <VideoCaseCard item={item} key={item.caseId} compact />)
+        ) : (
+          <p className="empty-text">暂无案例数据</p>
+        )}
       </div>
     </section>
   );

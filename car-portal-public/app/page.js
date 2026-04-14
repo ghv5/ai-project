@@ -5,8 +5,8 @@ import HomeFeaturedCases from '../components/HomeFeaturedCases';
 import HomeHero from '../components/HomeHero';
 import HomeMetrics from '../components/HomeMetrics';
 import HomeNewsBoard from '../components/HomeNewsBoard';
+import HomeProcessFlow from '../components/HomeProcessFlow';
 import HomeServicePanel from '../components/HomeServicePanel';
-import HomeValueGrid from '../components/HomeValueGrid';
 import PortalHeader from '../components/PortalHeader';
 import { fetchHomeContent, getToken, listPortalCases, logoutAll } from '../lib/api';
 
@@ -36,11 +36,11 @@ export default function HomePage() {
     <main className="portal-root portal-home">
       <PortalHeader active="home" loggedIn={loggedIn} onLogout={handleLogout} />
       <HomeHero
-        subtitle={homeData.heroSubtitle || '面向汽车仿真、标注与案例运营的一体化品牌门户'}
-        title={homeData.heroTitle || '汽车数据门户平台'}
+        subtitle={homeData.heroSubtitle || ''}
+        title={homeData.heroTitle || ''}
       />
       <HomeMetrics stats={homeData.stats || []} />
-      <HomeValueGrid />
+      <HomeProcessFlow steps={homeData.flowSteps || []} />
       <HomeNewsBoard news={homeData.news || []} />
       <HomeServicePanel services={homeData.services || []} />
       <HomeFeaturedCases cases={cases.slice(0, 3)} />

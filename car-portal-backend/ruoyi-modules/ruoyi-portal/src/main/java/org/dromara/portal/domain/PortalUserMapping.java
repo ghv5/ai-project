@@ -27,6 +27,11 @@ public class PortalUserMapping implements Serializable {
     private Long id;
 
     /**
+     * 租户编号
+     */
+    private Long tenantId;
+
+    /**
      * 用户ID
      */
     private Long userId;

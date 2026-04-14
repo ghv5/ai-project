@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>第三方平台</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="third-party">
+    <main class="third-party-page">
+      <header class="third-party-header">
+        <h1 id="thirdPartyTitle">第三方平台</h1>
+        <a class="ghost-btn" href="./index.html">返回门户</a>
+      </header>
+      <div class="third-party-status" id="thirdPartyStatus">正在创建统一登录票据...</div>
+      <iframe id="thirdPartyFrame" class="third-party-frame" title="third-party-frame"></iframe>
+    </main>
+
+    <script src="./vendor/crypto-js.js"></script>
+    <script src="./vendor/jsencrypt.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

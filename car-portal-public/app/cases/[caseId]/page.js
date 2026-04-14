@@ -57,9 +57,7 @@ export default function CaseDetailPage() {
               </div>
               <div className="detail-actions">
                 {detail.videoUrl ? (
-                  <a href={detail.videoUrl} rel="noreferrer" target="_blank">
-                    播放视频
-                  </a>
+                  <video controls preload="metadata" src={detail.videoUrl} style={{ width: '100%', maxWidth: '980px' }} />
                 ) : (
                   <span className="muted-text">未配置视频地址</span>
                 )}

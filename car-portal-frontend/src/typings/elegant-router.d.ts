@@ -36,6 +36,10 @@ declare module "@elegant-router/types" {
     "monitor_logininfor": "/monitor/logininfor";
     "monitor_online": "/monitor/online";
     "monitor_operlog": "/monitor/operlog";
+    "portal": "/portal";
+    "portal_case": "/portal/case";
+    "portal_home": "/portal/home";
+    "portal_mapping": "/portal/mapping";
     "social-callback": "/social-callback";
     "system": "/system";
     "system_client": "/system/client";
@@ -98,6 +102,7 @@ declare module "@elegant-router/types" {
     | "iframe-page"
     | "login"
     | "monitor"
+    | "portal"
     | "social-callback"
     | "system"
     | "tool"
@@ -134,6 +139,9 @@ declare module "@elegant-router/types" {
     | "monitor_logininfor"
     | "monitor_online"
     | "monitor_operlog"
+    | "portal_case"
+    | "portal_home"
+    | "portal_mapping"
     | "system_client"
     | "system_config"
     | "system_dept"

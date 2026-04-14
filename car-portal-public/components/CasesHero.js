@@ -9,6 +9,9 @@ export default function CasesHero() {
         <p>汇聚汽车标注、仿真、数据处理相关视频案例，支持检索、分类浏览与置顶推荐展示。</p>
       </div>
       <div className="cases-banner-visual">
+        <div className="cases-banner-grid" />
+        <div className="cases-banner-orb cases-banner-orb-primary" />
+        <div className="cases-banner-orb cases-banner-orb-secondary" />
         <div className="cases-banner-frame">
           <span>精选视频案例</span>
           <span>标注 / 仿真 / 数据</span>

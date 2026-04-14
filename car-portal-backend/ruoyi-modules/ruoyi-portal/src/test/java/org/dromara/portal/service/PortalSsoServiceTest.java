@@ -5,6 +5,7 @@ import org.dromara.portal.config.PortalSsoProperties;
 import org.dromara.portal.domain.dto.CreateTicketResponse;
 import org.dromara.portal.domain.dto.TicketExchangeRequest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@Tag("dev")
 public class PortalSsoServiceTest {
 
     @Mock

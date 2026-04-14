@@ -8,7 +8,10 @@ export default function PinnedVideoSection({ cases = [] }) {
   return (
     <section className="pinned-block">
       <div className="section-head">
-        <h2>置顶视频案例</h2>
+        <div className="section-title-wrap">
+          <p className="section-kicker">PINNED CONTENT</p>
+          <h2>置顶视频案例</h2>
+        </div>
       </div>
       <div className="case-grid compact">
         {cases.map(item => (

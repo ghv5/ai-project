@@ -13,8 +13,14 @@ export default function VideoCaseCard({ item, compact = false }) {
   return (
     <article className={`video-case-card${compact ? ' compact' : ''}`}>
       <div className="video-cover">
-        <span className="video-play">▶</span>
-        <span className="video-duration">{deriveDuration(item)}</span>
+        {item.videoUrl ? (
+          <video className="video-cover-player" controls preload="metadata" src={item.videoUrl} />
+        ) : (
+          <>
+            <span className="video-play">▶</span>
+            <span className="video-duration">{deriveDuration(item)}</span>
+          </>
+        )}
       </div>
       <h3>{item.title}</h3>
       <p>{item.description || ''}</p>
@@ -22,7 +28,7 @@ export default function VideoCaseCard({ item, compact = false }) {
         <span>{item.updateTime ? String(item.updateTime).slice(0, 10) : '未更新时间'}</span>
         <span>{item.tags || '未设置标签'}</span>
       </div>
-      <Link href={`/cases/${item.caseId}`}>播放详情</Link>
+      <Link href={`/cases/${item.caseId}`}>查看详情</Link>
     </article>
   );
 }

@@ -8,6 +8,8 @@ pnpm-lock.yaml
 dist/
 build/
 .out/
+.next/
+**/.next/
 **/target/
 *.class
 *.jar

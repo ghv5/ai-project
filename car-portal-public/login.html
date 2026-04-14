@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>门户登录</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="login">
+    <main class="login-page">
+      <header class="login-header">
+        <div class="brand-mark">A</div>
+        <div>
+          <div class="brand-cn">安徽省数据交易所</div>
+          <div class="brand-en">ANHUI DATA EXCHANGE</div>
+        </div>
+      </header>
+
+      <section class="login-card-wrap">
+        <div class="login-card">
+          <div class="login-tabs">
+            <button type="button" class="active">账号登录</button>
+            <button type="button">手机验证码登录</button>
+          </div>
+
+          <form class="login-form" id="loginForm">
+            <input id="username" type="text" placeholder="请输入账号" value="admin" />
+            <input id="password" type="password" placeholder="请输入密码" value="admin123" />
+            <div class="captcha-row">
+              <input id="code" type="text" placeholder="请输入验证码" />
+              <button id="captchaBtn" class="captcha-img captcha-button" type="button">加载中</button>
+            </div>
+            <a href="#" class="forget-link">忘记密码?</a>
+            <button type="submit" class="submit-btn">登 录 →</button>
+            <p class="register-tip">登录成功后将回到门户首页并使用统一登录态访问第三方平台。</p>
+            <p class="message-line" id="loginMessage"></p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <script src="./vendor/crypto-js.js"></script>
+    <script src="./vendor/jsencrypt.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

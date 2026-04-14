@@ -26,6 +26,11 @@ public class PortalCase implements Serializable {
     private Long caseId;
 
     /**
+     * 租户编号
+     */
+    private Long tenantId;
+
+    /**
      * 标题
      */
     private String title;
@@ -88,17 +93,17 @@ public class PortalCase implements Serializable {
     /**
      * 创建人
      */
-    private Long createBy;
+    private String createBy;
 
     /**
      * 更新人
      */
-    private Long updateBy;
+    private String updateBy;
 
     /**
      * 删除标志（0代表存在 1代表删除）
      */
     @TableLogic
-    private String delFlag;
+    private Integer delFlag;
 
 }

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
+import org.apache.ibatis.type.JdbcType;
 import org.dromara.portal.domain.dto.NewsItemDto;
 import org.dromara.portal.domain.dto.ServiceCenterItemDto;
 import org.dromara.portal.domain.dto.StatItemDto;
@@ -32,6 +33,11 @@ public class PortalHomeContent implements Serializable {
     private Long id;
 
     /**
+     * 租户编号
+     */
+    private Long tenantId;
+
+    /**
      * 首页主标题
      */
     private String heroTitle;
@@ -44,25 +50,25 @@ public class PortalHomeContent implements Serializable {
     /**
      * 流程步骤
      */
-    @TableField(value = "flow_steps_json", typeHandler = JacksonTypeHandler.class)
+    @TableField(value = "flow_steps_json", typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.OTHER)
     private List<String> flowSteps;
 
     /**
      * 统计项
      */
-    @TableField(value = "stats_json", typeHandler = JacksonTypeHandler.class)
+    @TableField(value = "stats_json", typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.OTHER)
     private List<StatItemDto> stats;
 
     /**
      * 服务中心项
      */
-    @TableField(value = "services_json", typeHandler = JacksonTypeHandler.class)
+    @TableField(value = "services_json", typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.OTHER)
     private List<ServiceCenterItemDto> services;
 
     /**
      * 新闻项
      */
-    @TableField(value = "news_json", typeHandler = JacksonTypeHandler.class)
+    @TableField(value = "news_json", typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.OTHER)
     private List<NewsItemDto> news;
 
     /**
