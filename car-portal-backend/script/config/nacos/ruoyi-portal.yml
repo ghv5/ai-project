@@ -18,7 +18,7 @@ portal:
   sso:
     ticket-expire-seconds: 60
     session-expire-seconds: 28800
-    callback-secret: ${PORTAL_SSO_CALLBACK_SECRET:change-me}
+    callback-secret: ${PORTAL_SSO_CALLBACK_SECRET:}
     allowed-timestamp-skew-seconds: 300
     annotate-entry-url: http://localhost:3000/third-party/annotate
     simulate-entry-url: http://localhost:3000/third-party/simulate

@@ -8,14 +8,20 @@ const privateKey = import.meta.env.VITE_APP_RSA_PRIVATE_KEY;
 
 // 加密
 export const encrypt = (txt: string) => {
+  if (!publicKey) {
+    throw new Error('VITE_APP_RSA_PUBLIC_KEY is required');
+  }
   const encryptor = new JSEncrypt();
-  encryptor.setPublicKey(publicKey!); // 设置公钥
+  encryptor.setPublicKey(publicKey); // 设置公钥
   return encryptor.encrypt(txt); // 对数据进行加密
 };
 
 // 解密
 export const decrypt = (txt: string) => {
+  if (!privateKey) {
+    throw new Error('VITE_APP_RSA_PRIVATE_KEY is required to decrypt encrypted responses');
+  }
   const encryptor = new JSEncrypt();
-  encryptor.setPrivateKey(privateKey!); // 设置私钥
+  encryptor.setPrivateKey(privateKey); // 设置私钥
   return encryptor.decrypt(txt); // 对数据进行解密
 };

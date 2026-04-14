@@ -1,5 +1,7 @@
 package org.dromara.portal.config;
 
+import cn.hutool.core.util.StrUtil;
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -25,7 +27,7 @@ public class PortalSsoProperties {
     /**
      * 签名密钥（第三方调用 exchange 接口）
      */
-    private String callbackSecret = "portal-change-me";
+    private String callbackSecret = "";
 
     /**
      * 时间戳容差（秒）
@@ -51,4 +53,11 @@ public class PortalSsoProperties {
      * 仿真平台登出回调地址
      */
     private String simulateLogoutUrl = "";
+
+    @PostConstruct
+    public void validate() {
+        if (StrUtil.isBlank(callbackSecret) || "portal-change-me".equals(callbackSecret) || "change-me".equals(callbackSecret)) {
+            throw new IllegalStateException("portal.sso.callback-secret must be configured with a non-default secret");
+        }
+    }
 }
