@@ -298,6 +298,10 @@ const local: App.I18n.Schema = {
     exception_500: '500',
     tool: '系统工具',
     tool_gen: '代码生成',
+    portal: '门户管理',
+    portal_case: '案例库管理',
+    portal_home: '首页配置',
+    portal_mapping: '用户映射管理',
     about: '关于'
   },
   menu: {

@@ -8,6 +8,8 @@ pnpm-lock.yaml
 dist/
 build/
 .out/
+.next/
+**/.next/
 **/target/
 *.class
 *.jar
@@ -49,6 +51,7 @@ coverage/
 
 # Local git worktree metadata
 .tree/
+.worktrees/
 
 # Local runtime artifacts
 **/.local-run/

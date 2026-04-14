@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>汽车门户平台</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="home">
+    <main class="portal-page">
+      <header class="top-nav">
+        <div class="brand-wrap">
+          <div class="brand-mark">A</div>
+          <div>
+            <div class="brand-cn">安徽省数据交易所</div>
+            <div class="brand-en">ANHUI DATA EXCHANGE</div>
+          </div>
+        </div>
+        <nav>
+          <ul class="nav-list">
+            <li class="active">首页</li>
+            <li>证书展厅</li>
+            <li>登记公示</li>
+            <li>服务中心</li>
+            <li>资讯公告</li>
+            <li>登记指南</li>
+          </ul>
+        </nav>
+        <div class="nav-actions">
+          <a class="ghost-btn" href="./third-party.html?platform=annotate">标注平台</a>
+          <a class="ghost-btn" href="./third-party.html?platform=simulate">仿真平台</a>
+          <a class="login-btn" id="authAction" href="./login.html">登录</a>
+        </div>
+      </header>
+
+      <section class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <h1 id="heroTitle">数据产权登记大厅</h1>
+          <p id="heroSubtitle">面向汽车仿真、标注、案例与资讯的一体化门户。</p>
+          <button type="button" id="heroAction">首次登记</button>
+        </div>
+      </section>
+
+      <section class="stat-wrap" id="statsWrap"></section>
+
+      <section class="flow-section">
+        <h2>数据产权登记流程</h2>
+        <div class="flow-strip" id="flowSteps"></div>
+      </section>
+
+      <section class="service-section">
+        <h2>服务中心</h2>
+        <div class="service-layout">
+          <aside class="service-tabs" id="serviceTabs"></aside>
+          <div class="service-main">
+            <h3 id="serviceTitle">数据合规服务</h3>
+            <p id="serviceDescription"></p>
+            <div class="partner-list" id="partnerList"></div>
+          </div>
+          <div class="service-side-card">
+            <h4>第三方服务机构</h4>
+            <p>依法为登记申请人提供数据合规性、真实性审查和质量评估等服务。</p>
+            <button type="button">立即入驻</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="notice-section">
+        <h2>资讯公告</h2>
+        <div class="notice-layout">
+          <article class="notice-feature" id="highlightNews"></article>
+          <div class="notice-list" id="newsList"></div>
+          <div class="notice-illustration"></div>
+        </div>
+      </section>
+
+      <section class="case-section">
+        <h2>热门案例</h2>
+        <div class="case-grid" id="caseGrid"></div>
+      </section>
+    </main>
+
+    <script src="./vendor/crypto-js.js"></script>
+    <script src="./vendor/jsencrypt.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

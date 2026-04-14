@@ -1,0 +1,1 @@
+../../car-portal-frontend/node_modules/crypto-js/crypto-js.js

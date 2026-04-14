@@ -1,0 +1,27 @@
+server:
+  port: 9208
+
+spring:
+  application:
+    name: ruoyi-portal
+  profiles:
+    active: @profiles.active@
+
+---
+spring:
+  cloud:
+    nacos:
+      server-addr: @nacos.server@
+      username: @nacos.username@
+      password: @nacos.password@
+      discovery:
+        group: @nacos.discovery.group@
+        namespace: ${spring.profiles.active}
+      config:
+        group: @nacos.config.group@
+        namespace: ${spring.profiles.active}
+  config:
+    import:
+      - optional:nacos:application-common.yml
+      - optional:nacos:datasource.yml
+      - optional:nacos:${spring.application.name}.yml
